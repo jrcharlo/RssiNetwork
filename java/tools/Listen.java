@@ -80,7 +80,8 @@ public class Listen {
 
   public void locate(){
     for(int i = 0; i < distances.length; i++){
-      System.out.println("Node " + i+numrelaynodes + " is " + distances[i] + " cm away from target.");
+      System.out.println("Node " + i+numrelaynodes + " is " + distances[i] + " cm away from target
+      //hello
     }
   }
 
