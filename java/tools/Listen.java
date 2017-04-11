@@ -91,8 +91,7 @@ public class Listen {
 
   public static void locate(){
     for(int i = 0; i < distances.length; i++){
-      System.out.println("Node " + i+numrelaynodes + " is " + distances[i] + " cm away from the target.");
-      //hello
+      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + distances[i] + " m away from the target.");
     }
   }
 
