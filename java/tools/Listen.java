@@ -5,10 +5,10 @@ import java.nio.ByteBuffer;
 import java.lang.Math.*;
 
 public class Listen {
-  int numnodes = 5;
-  int numrelaynodes = numnodes - 2;
-  double[] distances = new double[numrelaynodes];
-  int[][] relaynodes = new int[numrelaynodes][2];
+  static int numnodes = 5;
+  static int numrelaynodes = numnodes - 2;
+  static double[] distances = new double[numrelaynodes];
+  static double[][] relaynodes = new double[numrelaynodes][2];
 
 
   public static void main(String args[]) throws IOException {
@@ -36,6 +36,7 @@ public class Listen {
 
     try {
       reader.open(PrintStreamMessenger.err);
+      initializeNodes();
       for (;;) {
         byte[] packet = reader.readPacket();
         if(packet.length == 12){
@@ -61,6 +62,7 @@ public class Listen {
 //          System.out.println("Node " + nodeid + " received signal strength of " + rssi_dbm + " dBm.");
 //          System.out.println("Node " + nodeid + " is " + d*100 + " cm away from the target. (" + rssi_dbm + "dBm)");
 //          System.out.println(rssi_dbm);
+            updateNode(nodeid, d);
           }
           System.out.flush();
         }
@@ -71,16 +73,25 @@ public class Listen {
     }
   }
 
-  public void updateNode(int nodeid, double distance){
+  public static void initializeNodes(){
+    relaynodes[0][0] = 0; // node's x position
+    relaynodes[0][1] = 0; // node's y position
+    relaynodes[1][0] = 35.56; // node's x position
+    relaynodes[1][1] = 90.8; // node's y position
+    relaynodes[2][0] = 73.66; // node's x position
+    relaynodes[2][1] = 0; // node's y position
+  }
+
+  public static void updateNode(int nodeid, double distance){
     distances[nodeid-numrelaynodes] = distance;
     if(nodeid == numnodes){
       locate();
     }
   }
 
-  public void locate(){
+  public static void locate(){
     for(int i = 0; i < distances.length; i++){
-      System.out.println("Node " + i+numrelaynodes + " is " + distances[i] + " cm away from target
+      System.out.println("Node " + i+numrelaynodes + " is " + distances[i] + " cm away from the target.");
       //hello
     }
   }
