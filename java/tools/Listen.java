@@ -76,9 +76,9 @@ public class Listen {
   public static void initializeNodes(){
     relaynodes[0][0] = 0; // node's x position
     relaynodes[0][1] = 0; // node's y position
-    relaynodes[1][0] = 35.56; // node's x position
-    relaynodes[1][1] = 90.8; // node's y position
-    relaynodes[2][0] = 73.66; // node's x position
+    relaynodes[1][0] = 45; // node's x position
+    relaynodes[1][1] = 90; // node's y position
+    relaynodes[2][0] = 90; // node's x position
     relaynodes[2][1] = 0; // node's y position
   }
 
@@ -90,9 +90,15 @@ public class Listen {
   }
 
   public static void locate(){
-    for(int i = 0; i < distances.length; i++){
-      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + distances[i] + " m away from the target.");
-    }
+//    for(int i = 0; i < distances.length; i++){
+//      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + distances[i] + " m away from the target.");
+//    }
+    /*
+    Node 1 at (0,0), Node 2 at (d, 0), Node 3 at (i, j) (i along x axis, j along y axis from Node 1)
+    x = (r1^2 - r2^2 + d^2)/(2*d)
+    y = (r1^2 - r3^2 + i^2 + j^2)/(2*j) - (i*x)/j
+    */
+
   }
 
 }
