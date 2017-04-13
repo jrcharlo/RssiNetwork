@@ -1,12 +1,12 @@
 <tos_image>
   <ident>
-    <deluge_support>no</deluge_support>
     <userhash>2FBFB0A8L</userhash>
-    <uidhash>E8A31F51L</uidhash>
+    <timestamp>58F00516L</timestamp>
     <username>jrcharlo</username>
-    <timestamp>58E51DADL</timestamp>
-    <platform>telosb</platform>
     <hostname>jrcharlo-Inspir</hostname>
+    <platform>telosb</platform>
+    <uidhash>3EF83D85L</uidhash>
+    <deluge_support>no</deluge_support>
     <appname>BaseStationC</appname>
   </ident>
   <image format="ihex">

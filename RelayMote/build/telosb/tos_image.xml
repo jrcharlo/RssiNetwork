@@ -1,13 +1,13 @@
 <tos_image>
   <ident>
     <deluge_support>no</deluge_support>
-    <timestamp>58E51D99L</timestamp>
-    <username>jrcharlo</username>
     <platform>telosb</platform>
-    <appname>RelayMoteAppC</appname>
     <hostname>jrcharlo-Inspir</hostname>
+    <uidhash>91DD0575L</uidhash>
     <userhash>2FBFB0A8L</userhash>
-    <uidhash>A6CFB33DL</uidhash>
+    <username>jrcharlo</username>
+    <timestamp>58F004F5L</timestamp>
+    <appname>RelayMoteAppC</appname>
   </ident>
   <image format="ihex">
 :10400000314000391542200175F335D0085A3F4040
