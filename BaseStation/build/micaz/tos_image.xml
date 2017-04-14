@@ -1,13 +1,13 @@
 <tos_image>
   <ident>
-    <appname>BaseStationC</appname>
-    <hostname>jrcharlo-Inspir</hostname>
-    <uidhash>3CA4443BL</uidhash>
-    <platform>micaz</platform>
-    <username>jrcharlo</username>
     <userhash>2FBFB0A8L</userhash>
+    <platform>micaz</platform>
+    <timestamp>58F11383L</timestamp>
+    <uidhash>C7EEA536L</uidhash>
     <deluge_support>no</deluge_support>
-    <timestamp>58ACEA2DL</timestamp>
+    <appname>BaseStationC</appname>
+    <username>jrcharlo</username>
+    <hostname>jrcharlo-Inspir</hostname>
   </ident>
   <image format="ihex">
 :100000000C945E010C94CF060C94D9060C94E30674
