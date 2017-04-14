@@ -3,6 +3,7 @@ import net.tinyos.packet.*;
 import net.tinyos.util.*;
 import java.nio.ByteBuffer;
 import java.lang.Math.*;
+import java.util.*;
 
 public class Listen {
   static int numnodes = 5;
@@ -57,11 +58,11 @@ public class Listen {
           if(nodeid != 2){
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
-            int a = -50; // dBm at 1 m/Transmission power
+            int a = -45; // dBm at 1 m/Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
 //          System.out.println("Node " + nodeid + " received signal strength of " + rssi_dbm + " dBm.");
-//          System.out.println("Node " + nodeid + " is " + d*100 + " cm away from the target. (" + rssi_dbm + "dBm)");
+          System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
 //          System.out.println(rssi_dbm);
             updateNode(nodeid, d);
           }
@@ -77,10 +78,10 @@ public class Listen {
   public static void initializeNodes(){
     rnodes[0][0] = 0.0; // node's x position
     rnodes[0][1] = 0.0; // node's y position
-    rnodes[1][0] = 0.32; // node's x position
+    rnodes[1][0] = 0.6233; // node's x position
     rnodes[1][1] = 0.0; // node's y position
-    rnodes[2][0] = 0.22; // node's x position
-    rnodes[2][1] = 0.46; // node's y position
+    rnodes[2][0] = 0.34925; // node's x position
+    rnodes[2][1] = 0.9144; // node's y position
   }
 
   public static void updateNode(int nodeid, double distance){
@@ -91,9 +92,9 @@ public class Listen {
   }
 
   public static void locateTarget(){
-    for(int i = 0; i < tdistances.length; i++){
-      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + tdistances[i] + " m away from the target.");
-    }
+//    for(int i = 0; i < tdistances.length; i++){
+//      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + tdistances[i] + " m away from the target.");
+//    }
     /*
     Node 1 at (0,0), Node 2 at (d, 0), Node 3 at (i, j) (i along x axis, j along y axis from Node 1)
     x = (r1^2 - r2^2 + d^2)/(2*d)
@@ -104,27 +105,56 @@ public class Listen {
     int n1 = targetd[0];
     int n2 = targetd[1];
     int n3 = targetd[2];
-    double d12 = 0;
-    // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
-    d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n2][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n2][1]), 2));
+
+    boolean invalid = true;
+
     double targetx = 0;
-    targetx = (Math.pow(tdistances[n1], 2) - Math.pow(tdistances[n2], 2) + Math.pow(d12, 2))/(2*d12);
+    double d12 = 0;
     double d13 = 0;
-    d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n3][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n3][1]), 2));
-    double angle13 = 0;
-    angle13 = Math.atan(Math.abs(rnodes[n1][0] - rnodes[n3][0])/Math.abs(rnodes[n1][1] - rnodes[n3][1]));
     double j = 0;
     double k = 0;
-    j = d13*Math.cos(angle13);
-    k = d13*Math.sin(angle13);
+    double angle13 = 0;
     double targety = 0;
-    targety = (Math.pow(tdistances[n1],2) - Math.pow(tdistances[n3],2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*Math.abs(targetx))/k;
 
-//    System.out.println("d12 = "+d12);
-//    System.out.println("d13 = "+d13);
-//    System.out.println("angle13 = "+angle13);
-//    System.out.println("(j, k) = ("+j+", "+k+")");
-    System.out.println("Target is at (x,y) = ("+Math.abs(targetx)+", "+Math.abs(targety)+").");
+    while(invalid){
+      // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
+      d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n2][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n2][1]), 2));
+      if(d12 < (tdistances[n1] + tdistances[n2])){
+        tdistances[n2] -= 0.05; //shrink by 5 cm
+        continue;
+      }
+      targetx = (Math.pow(tdistances[n1], 2) - Math.pow(tdistances[n2], 2) + Math.pow(d12, 2))/(2*d12);
+      if(targetx < 0){
+        shrinkLargestDist();
+        continue;
+      }
+      d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n3][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n3][1]), 2));
+      if((d13 < (tdistances[n1] + tdistances[n3])) || (d13 < (tdistances[n1] + tdistances[n2]))){
+        tdistances[n3] -= 0.05; //shrink by 5 cm
+        continue;
+      }
+      angle13 = Math.atan(Math.abs(rnodes[n1][0] - rnodes[n3][0])/Math.abs(rnodes[n1][1] - rnodes[n3][1]));
+      j = d13*Math.cos(angle13);
+      k = d13*Math.sin(angle13);
+      targety = (Math.pow(tdistances[n1],2) - Math.pow(tdistances[n3],2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*Math.abs(targetx))/k;
+      if(targety < 0){
+        shrinkLargestDist();
+      }
+      else{
+        invalid = false;
+      }
+    }
+
+    System.out.println("d12 = "+d12);
+    System.out.println("d13 = "+d13);
+    System.out.println("angle13 = "+angle13);
+    System.out.println("(j, k) = ("+j+", "+k+")");
+    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
+
+    for(int i = 0; i < tdistances.length; i++){
+      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + tdistances[i] + " m away from the target.");
+    }
+    System.out.println();
   }
 
   public static void calculateSmallest(int mcase){
@@ -139,6 +169,16 @@ public class Listen {
       System.out.println("not yet implemented");
       // should calculate things for car distances here or something
     }
+  }
+
+  public static void shrinkLargestDist(){
+    int largest = 0;
+    for(int i = 0; i < targetd.length; i++){
+      if(tdistances[i] > tdistances[largest]){
+        largest = i;
+      }
+    }
+    tdistances[largest] -= 0.15; // shrink by 0.15 m (15 cm)
   }
 
 }
