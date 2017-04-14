@@ -1,13 +1,13 @@
 <tos_image>
   <ident>
-    <appname>SendingMoteAppC</appname>
-    <userhash>2FBFB0A8L</userhash>
-    <deluge_support>no</deluge_support>
     <platform>telosb</platform>
-    <timestamp>58F00493L</timestamp>
-    <uidhash>0309948EL</uidhash>
-    <username>jrcharlo</username>
+    <appname>SendingMoteAppC</appname>
+    <uidhash>D2352E6FL</uidhash>
     <hostname>jrcharlo-Inspir</hostname>
+    <timestamp>58F0F7A2L</timestamp>
+    <deluge_support>no</deluge_support>
+    <userhash>2FBFB0A8L</userhash>
+    <username>jrcharlo</username>
   </ident>
   <image format="ihex">
 :10400000314000391542200175F335D0085A3F4040
