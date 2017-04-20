@@ -130,9 +130,9 @@ public class Listen {
 
   public static void calculateSmallest(int mcase){
     if(mcase == 0){ //tnodes (target nodes)
-      tnodes[0] = 7;
-      tnodes[1] = 7;
-      tnodes[2] = 7;
+      tnodes[0] = 99; // 99's should get phased out as real data spills in, set to 99 for debugging
+      tnodes[1] = 99;
+      tnodes[2] = 99;
       double min1 = 9997;
       double min2 = 9998;
       double min3 = 9999;
