@@ -142,6 +142,7 @@ public class Trilaterate {
       System.out.println("Node " + (int)(i+numrelaynodes) + " is " + rnodes[i].td + " m away from the target.");
     }
     System.out.println();
+    
   }
 
   public static void calculateSmallest(int mcase){
