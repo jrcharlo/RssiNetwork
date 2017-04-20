@@ -39,7 +39,7 @@ public class Listen {
     try {
       reader.open(PrintStreamMessenger.err);
       initializeNodes();
-      for (;;) {
+      while(true){
         byte[] packet = reader.readPacket();
         if(packet.length == 12){
           byte[] nodeid_b = {0x00,0x00,packet[8],packet[9]};
