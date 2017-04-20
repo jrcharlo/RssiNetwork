@@ -128,6 +128,10 @@ public class Trilaterate {
     k = d13*Math.sin(angle13);
     targety = Math.abs((Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*targetx)/k);
 
+    // (x,y) relative to n1, add n1 to offset
+    targetx += rnodes[n1].x;
+    targety += rnodes[n1].y;
+
     System.out.println("d12 = "+d12);
     System.out.println("d13 = "+d13);
     System.out.println("angle13 = "+angle13);
