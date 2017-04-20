@@ -68,13 +68,25 @@ public class Trilaterate {
     }
   }
 
-  public static void initializeNodes(){
-    rnodes[0].x = 0.0;      // node's x position
-    rnodes[0].y = 0.0;      // node's y position
-    rnodes[1].x = 0.6233;   // node's x position
-    rnodes[1].y = 0.0;      // node's y position
-    rnodes[2].x = 0.34925;  // node's x position
-    rnodes[2].y = 0.9144;   // node's y position
+  public static void initializeNodes(){ // make this function read from a file or demand user input
+    // hard-coding works for now
+    Scanner input = new Scanner("NodeInput.txt");
+    String line;
+    String[] splitline;
+    int n = 0;
+    while(input.hasNextLine()){
+      line = input.nextLine();
+      splitline = line.split("\\s+");
+      rnodes[n].x = Double.parseDouble(splitline[0]);
+      rnodes[n].y = Double.parseDouble(splitline[1]);
+      n++;
+    }
+
+    System.out.println(n+" relay nodes configured"); // debug statement
+
+    for(int i = 0; i < rnodes.length; i++){ // debug statement
+      System.out.println("Node "+i+"is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")");
+    }
   }
 
   public static void updateNode(int nodeid, double distance){
