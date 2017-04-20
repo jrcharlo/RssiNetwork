@@ -129,21 +129,31 @@ public class Listen {
 
   public static void calculateSmallest(int mcase){
     if(mcase == 0){ //tnodes (target nodes)
-      tnodes[0] = 0;
-      tnodes[1] = 1;
-      tnodes[2] = 2;
+      tnodes[0] = 7;
+      tnodes[1] = 7;
+      tnodes[2] = 7;
+      double min1 = 9997;
+      double min2 = 9998;
+      double min3 = 9999;
+
       for(int i = 0; i < rnodes.length; i++){
-        if((rnodes[i].td < rnodes[tnodes[0]].td) && (rnodes[i].td < rnodes[tnodes[1]].td) && (rnodes[i].td < rnodes[tnodes[2]].td)){
+        if(rnodes[i].td < min1){
           tnodes[2] = tnodes[1];
           tnodes[1] = tnodes[0];
           tnodes[0] = i;
+          min3 = min2;
+          min2 = min1;
+          min1 = rnodes[i].td;
         }
-        else if((rnodes[i].td < rnodes[tnodes[1]].td) && (rnodes[i].td < rnodes[tnodes[2]].td)){
+        else if(rnodes[i].td < min2){
           tnodes[2] = tnodes[1];
           tnodes[1] = i;
+          min3 = min2;
+          min2 = rnodes[i].td;
         }
-        else if(rnodes[i].td < rnodes[tnodes[2]].td){
+        else if(rnodes[i].td < min3){
           tnodes[2] = i;
+          min3 = rnodes[i].td;
         }
       }
     }
