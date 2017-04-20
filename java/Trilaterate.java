@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 import java.lang.Math.*;
 import java.util.*;
 
-public class Listen {
+public class Trilaterate {
   static int numnodes = 5; // total number of nodes
   static int nonrnodes = 1+1; // number of sending motes + base station (not relay nodes)
   static int numrelaynodes = numnodes - nonrnodes;
@@ -21,7 +21,7 @@ public class Listen {
       source = args[1];
     }
     else if (args.length > 0) {
-      System.err.println("usage: java net.tinyos.tools.Listen [-comm PACKETSOURCE]");
+      System.err.println("usage: java Trilaterate [-comm PACKETSOURCE]");
       System.err.println("       (default packet source from MOTECOM environment variable)");
       System.exit(2);
     }
@@ -69,12 +69,12 @@ public class Listen {
   }
 
   public static void initializeNodes(){
-    rnodes[0].x = 0.0; // node's x position
-    rnodes[0].y = 0.0; // node's y position
-    rnodes[1].x = 0.6233; // node's x position
-    rnodes[1].y = 0.0; // node's y position
-    rnodes[2].x = 0.34925; // node's x position
-    rnodes[2].y = 0.9144; // node's y position
+    rnodes[0].x = 0.0;      // node's x position
+    rnodes[0].y = 0.0;      // node's y position
+    rnodes[1].x = 0.6233;   // node's x position
+    rnodes[1].y = 0.0;      // node's y position
+    rnodes[2].x = 0.34925;  // node's x position
+    rnodes[2].y = 0.9144;   // node's y position
   }
 
   public static void updateNode(int nodeid, double distance){

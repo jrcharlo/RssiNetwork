@@ -1,2 +1,2 @@
 use:
-java Listen -comm serial@/dev/ttyUSB0:telosb
+java Trilaterate -comm serial@/dev/ttyUSB0:telosb
