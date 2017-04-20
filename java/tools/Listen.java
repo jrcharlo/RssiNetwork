@@ -6,8 +6,9 @@ import java.lang.Math.*;
 import java.util.*;
 
 public class Listen {
-  static int numnodes = 5;
-  static int numrelaynodes = numnodes - 2;
+  static int numnodes = 5; // total number of nodes
+  static int nonrnodes = 1+1; // number of sending motes + base station (not relay nodes)
+  static int numrelaynodes = numnodes - nonrnodes;
   static Node[] rnodes = new Node[numrelaynodes]; // relay nodes
   static int[] tnodes = new int[3]; // 3 relay nodes used to calculate target location
   static int[] cnodes = new int[3]; // 3 relay nodes used to calculate car location
