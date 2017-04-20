@@ -6,7 +6,7 @@ import java.lang.Math.*;
 import java.util.*;
 
 public class Trilaterate {
-  static int numnodes = 5; // total number of nodes
+  static int numnodes = 6; // total number of nodes
   static int nonrnodes = 1+1; // number of sending motes + base station (not relay nodes)
   static int numrelaynodes = numnodes - nonrnodes;
   static Node[] rnodes = new Node[numrelaynodes]; // relay nodes
@@ -70,27 +70,36 @@ public class Trilaterate {
 
   public static void initializeNodes(){ // make this function read from a file or demand user input
     // hard-coding works for now
-    Scanner input = new Scanner("NodeInput.txt");
-    String line;
-    String[] splitline;
+    File inputfile = new File("NodeInput.txt");
     int n = 0;
-    while(input.hasNextLine()){
-      line = input.nextLine();
-      splitline = line.split("\\s+");
-      rnodes[n].x = Double.parseDouble(splitline[0]);
-      rnodes[n].y = Double.parseDouble(splitline[1]);
-      n++;
+    try {
+      Scanner input = new Scanner(inputfile);
+      String line;
+      String[] splitline;
+      Node rnode;
+      while(input.hasNextLine()){
+        rnode = new Node();
+        line = input.nextLine();
+        splitline = line.split("\\s+");
+        rnode.x = Double.parseDouble(splitline[0]);
+        rnode.y = Double.parseDouble(splitline[1]);
+        rnodes[n++] = rnode;
+      }
     }
+    catch(FileNotFoundException e){
+      e.printStackTrace();
+    }
+
 
     System.out.println(n+" relay nodes configured"); // debug statement
 
     for(int i = 0; i < rnodes.length; i++){ // debug statement
-      System.out.println("Node "+i+"is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")");
+      System.out.println("Node "+i+" is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")");
     }
   }
 
   public static void updateNode(int nodeid, double distance){
-    rnodes[nodeid-numrelaynodes].td = distance;
+    rnodes[nodeid-(nonrnodes+1)].td = distance;
     if(nodeid == numnodes){
       locateTarget();
     }
@@ -111,6 +120,9 @@ public class Trilaterate {
     int n2 = tnodes[1];
     int n3 = tnodes[2];
 
+    System.out.println("Calculating using nodes:");
+    System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
+
     double targetx = 0;
     double d12 = 0;
     double d13 = 0;
@@ -121,28 +133,33 @@ public class Trilaterate {
 
     // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
     d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n2].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n2].y), 2));
-    targetx = Math.abs((Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12));
+    targetx = (Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12);
     d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n3].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n3].y), 2));
     angle13 = Math.atan(Math.abs(rnodes[n1].x - rnodes[n3].x)/Math.abs(rnodes[n1].y - rnodes[n3].y));
     j = d13*Math.cos(angle13);
     k = d13*Math.sin(angle13);
-    targety = Math.abs((Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*targetx)/k);
+    targety = (Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*Math.abs(targetx))/k;
+
+    //get x and y to line up with real x and y
 
     // (x,y) relative to n1, add n1 to offset
-    targetx += rnodes[n1].x;
-    targety += rnodes[n1].y;
+    if(rnodes[n1].x < rnodes[n2]){
+      targetx = rnodes[n1].x - targetx;
+    }
+    else{
+      targetx += rnodes[n1].x;
+    }
+//    targetx += rnodes[n1].x;
+//    targety += rnodes[n1].y;
 
     System.out.println("d12 = "+d12);
     System.out.println("d13 = "+d13);
     System.out.println("angle13 = "+angle13);
     System.out.println("(j, k) = ("+j+", "+k+")");
-    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
 
-    for(int i = 0; i < rnodes.length; i++){
-      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + rnodes[i].td + " m away from the target.");
-    }
+    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
-    
+
   }
 
   public static void calculateSmallest(int mcase){
