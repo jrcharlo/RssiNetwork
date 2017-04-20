@@ -8,10 +8,9 @@ import java.util.*;
 public class Listen {
   static int numnodes = 5;
   static int numrelaynodes = numnodes - 2;
-  static double[] tdistances = new double[numrelaynodes]; //target distances
-  static int[] targetd = new int[3]; // 3 closest nodes to target
-  static double[][] rnodes = new double[numrelaynodes][2];
-
+  static Node[] rnodes = new Node[numrelaynodes]; // relay nodes
+  static int[] tnodes = new int[3]; // 3 relay nodes used to calculate target location
+  static int[] cnodes = new int[3]; // 3 relay nodes used to calculate car location
 
   public static void main(String args[]) throws IOException {
     String source = null;
@@ -42,8 +41,6 @@ public class Listen {
       for (;;) {
         byte[] packet = reader.readPacket();
         if(packet.length == 12){
-//  	    Dump.printPacket(System.out, packet);
-//  	    System.out.println();
           byte[] nodeid_b = {0x00,0x00,packet[8],packet[9]};
           byte[] rssi_b = {0x00,0x00,packet[10],packet[11]};
 
@@ -51,9 +48,6 @@ public class Listen {
             rssi_b[0] = (byte)0xFF;
             rssi_b[1] = (byte)0xFF;
           }
-//        Dump.printPacket(System.out, nodeid_b);
-//        Dump.printPacket(System.out, rssi_b);
-//        System.out.println();
           int nodeid = ByteBuffer.wrap(nodeid_b).getInt();
           if(nodeid != 2){
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
@@ -61,9 +55,7 @@ public class Listen {
             int a = -45; // dBm at 1 m/Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
-//          System.out.println("Node " + nodeid + " received signal strength of " + rssi_dbm + " dBm.");
           System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
-//          System.out.println(rssi_dbm);
             updateNode(nodeid, d);
           }
           System.out.flush();
@@ -76,16 +68,16 @@ public class Listen {
   }
 
   public static void initializeNodes(){
-    rnodes[0][0] = 0.0; // node's x position
-    rnodes[0][1] = 0.0; // node's y position
-    rnodes[1][0] = 0.6233; // node's x position
-    rnodes[1][1] = 0.0; // node's y position
-    rnodes[2][0] = 0.34925; // node's x position
-    rnodes[2][1] = 0.9144; // node's y position
+    rnodes[0].x = 0.0; // node's x position
+    rnodes[0].y = 0.0; // node's y position
+    rnodes[1].x = 0.6233; // node's x position
+    rnodes[1].y = 0.0; // node's y position
+    rnodes[2].x = 0.34925; // node's x position
+    rnodes[2].y = 0.9144; // node's y position
   }
 
   public static void updateNode(int nodeid, double distance){
-    tdistances[nodeid-numrelaynodes] = distance;
+    rnodes[nodeid-numrelaynodes].td = distance;
     if(nodeid == numnodes){
       locateTarget();
     }
@@ -102,11 +94,9 @@ public class Listen {
     use distance equation to figure out d, j, k
     */
     calculateSmallest(0);
-    int n1 = targetd[0];
-    int n2 = targetd[1];
-    int n3 = targetd[2];
-
-    boolean invalid = true;
+    int n1 = tnodes[0];
+    int n2 = tnodes[1];
+    int n3 = tnodes[2];
 
     double targetx = 0;
     double d12 = 0;
@@ -116,34 +106,14 @@ public class Listen {
     double angle13 = 0;
     double targety = 0;
 
-    while(invalid){
-      // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
-      d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n2][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n2][1]), 2));
-      if(d12 < (tdistances[n1] + tdistances[n2])){
-        tdistances[n2] -= 0.05; //shrink by 5 cm
-        continue;
-      }
-      targetx = (Math.pow(tdistances[n1], 2) - Math.pow(tdistances[n2], 2) + Math.pow(d12, 2))/(2*d12);
-      if(targetx < 0){
-        shrinkLargestDist();
-        continue;
-      }
-      d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1][0] - rnodes[n3][0]), 2) + Math.pow(Math.abs(rnodes[n1][1] - rnodes[n3][1]), 2));
-      if((d13 < (tdistances[n1] + tdistances[n3])) || (d13 < (tdistances[n1] + tdistances[n2]))){
-        tdistances[n3] -= 0.05; //shrink by 5 cm
-        continue;
-      }
-      angle13 = Math.atan(Math.abs(rnodes[n1][0] - rnodes[n3][0])/Math.abs(rnodes[n1][1] - rnodes[n3][1]));
-      j = d13*Math.cos(angle13);
-      k = d13*Math.sin(angle13);
-      targety = (Math.pow(tdistances[n1],2) - Math.pow(tdistances[n3],2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*Math.abs(targetx))/k;
-      if(targety < 0){
-        shrinkLargestDist();
-      }
-      else{
-        invalid = false;
-      }
-    }
+    // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
+    d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n2].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n2].y), 2));
+    targetx = Math.abs((Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12));
+    d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n3].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n3].y), 2));
+    angle13 = Math.atan(Math.abs(rnodes[n1].x - rnodes[n3].x)/Math.abs(rnodes[n1].y - rnodes[n3].y));
+    j = d13*Math.cos(angle13);
+    k = d13*Math.sin(angle13);
+    targety = Math.abs((Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*targetx)/k);
 
     System.out.println("d12 = "+d12);
     System.out.println("d13 = "+d13);
@@ -151,34 +121,36 @@ public class Listen {
     System.out.println("(j, k) = ("+j+", "+k+")");
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
 
-    for(int i = 0; i < tdistances.length; i++){
-      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + tdistances[i] + " m away from the target.");
+    for(int i = 0; i < rnodes.length; i++){
+      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + rnodes[i].td + " m away from the target.");
     }
     System.out.println();
   }
 
   public static void calculateSmallest(int mcase){
-    if(mcase == 0){
-      for(int i = 0; i < 3; i++){ // stupid scheme that works because there are 3 nodes
-        // this should ideal place the index of the smallest distance in tdistances at 0
-        // second smallest at 1, largest at 2
-        targetd[i] = i;
+    if(mcase == 0){ //tnodes (target nodes)
+      tnodes[0] = 0;
+      tnodes[1] = 1;
+      tnodes[2] = 2;
+      for(int i = 0; i < rnodes.length; i++){
+        if((rnodes[i].td < rnodes[tnodes[0]].td) && (rnodes[i].td < rnodes[tnodes[1]].td) && (rnodes[i].td < rnodes[tnodes[2]].td)){
+          tnodes[2] = tnodes[1];
+          tnodes[1] = tnodes[0];
+          tnodes[0] = i;
+        }
+        else if((rnodes[i].td < rnodes[tnodes[1]].td) && (rnodes[i].td < rnodes[tnodes[2]].td)){
+          tnodes[2] = tnodes[1];
+          tnodes[1] = i;
+        }
+        else if(rnodes[i].td < rnodes[tnodes[2]].td){
+          tnodes[2] = i;
+        }
       }
     }
-    else if(mcase == 1){
+    else if(mcase == 1){ //cnodes (car nodes)
       System.out.println("not yet implemented");
       // should calculate things for car distances here or something
     }
-  }
-
-  public static void shrinkLargestDist(){
-    int largest = 0;
-    for(int i = 0; i < targetd.length; i++){
-      if(tdistances[i] > tdistances[largest]){
-        largest = i;
-      }
-    }
-    tdistances[largest] -= 0.15; // shrink by 0.15 m (15 cm)
   }
 
 }
