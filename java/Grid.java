@@ -1,6 +1,7 @@
 import java.io.*;
 import java.lang.Math.*;
 import java.util.*;
+import java.net.*;
 
 public class Grid{
   private int numNodes;
@@ -13,6 +14,7 @@ public class Grid{
   private double targety;
   private double carx;
   private double cary;
+  private Socket carSocket;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -26,6 +28,15 @@ public class Grid{
     carx = 0;
     cary = 0;
     initializeNodes();
+    Scanner scan = new Scanner(System.in);
+    System.out.println("Enter car's IP address: ");
+    String carIP = scan.nextLine();
+    try{
+      carSocket = new Socket(carIP, 8989);
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
   }
 
   /*
@@ -138,7 +149,6 @@ public class Grid{
       targety = rnodes[n1].y - (d1t * Math.sin(angle12+angle1t));
     }
 
-
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
 
@@ -159,13 +169,13 @@ public class Grid{
   * or the car (mcase == 1)
   */
   public void calculateSmallest(int mcase){
+    double min1 = 10000;
+    double min2 = 10000;
+    double min3 = 10000;
     if(mcase == 0){ //tnodes (target nodes)
       tnodes[0] = 97; // 90's should get phased out as real data spills in, set to 90's for debugging
       tnodes[1] = 98;
       tnodes[2] = 99;
-      double min1 = 9997;
-      double min2 = 9998;
-      double min3 = 9999;
 
       for(int i = 0; i < rnodes.length; i++){
         if(rnodes[i].td < min1){
@@ -192,9 +202,6 @@ public class Grid{
       cnodes[0] = 97; // 90's should get phased out as real data spills in, set to 90's for debugging
       cnodes[1] = 98;
       cnodes[2] = 99;
-      double min1 = 9997;
-      double min2 = 9998;
-      double min3 = 9999;
 
       for(int i = 0; i < rnodes.length; i++){
         if(rnodes[i].cd < min1){
@@ -217,6 +224,10 @@ public class Grid{
         }
       }
     }
+  }
+
+  public void sendtoCar(){
+    
   }
 
 }
