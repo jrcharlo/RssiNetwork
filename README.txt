@@ -14,8 +14,9 @@ make telosb install,x
 To use the Listen tool:
 1) default:
 java net.tinyos.tools.Listen -comm serial@/dev/ttyUSB0:telosb
-2) RSSI in dBm listening tool, is located in the java folder
-java Listen -comm serial@/dev/ttyUSB0:telosb
+
+To use the Trilaterate tool:
+cat java/README.txt
 
 Node ID notation (to be used when flashing motes):
 1 = base station
