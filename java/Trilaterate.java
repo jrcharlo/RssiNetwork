@@ -6,12 +6,10 @@ import java.lang.Math.*;
 import java.util.*;
 
 public class Trilaterate {
-  static int numnodes = 6; // total number of nodes
-  static int nonrnodes = 1+1; // number of sending motes + base station (not relay nodes)
-  static int numrelaynodes = numnodes - nonrnodes;
-  static Node[] rnodes = new Node[numrelaynodes]; // relay nodes
-  static int[] tnodes = new int[3]; // 3 relay nodes used to calculate target location
-  static int[] cnodes = new int[3]; // 3 relay nodes used to calculate car location
+  static int numNodes = 6; // total number of nodes
+  static int numNonRNodes = 1+1; // number of sending motes + base station (not relay nodes)
+  static int numRNodes = numNodes - numNonRNodes;
+  static Grid grid = new Grid(numNodes, numNonRNodes, numRNodes);
 
   public static void main(String args[]) throws IOException {
     String source = null;
@@ -38,7 +36,6 @@ public class Trilaterate {
 
     try {
       reader.open(PrintStreamMessenger.err);
-      initializeNodes();
       while(true){
         byte[] packet = reader.readPacket();
         if(packet.length == 12){
@@ -57,7 +54,7 @@ public class Trilaterate {
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
           System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
-            updateNode(nodeid, d);
+            grid.updateNodeDistance(nodeid, d, 0); // update target distance
           }
           System.out.flush();
         }
@@ -67,135 +64,4 @@ public class Trilaterate {
       System.err.println("Error on " + reader.getName() + ": " + e);
     }
   }
-
-  public static void initializeNodes(){ // make this function read from a file or demand user input
-    // hard-coding works for now
-    File inputfile = new File("NodeInput.txt");
-    int n = 0;
-    try {
-      Scanner input = new Scanner(inputfile);
-      String line;
-      String[] splitline;
-      Node rnode;
-      while(input.hasNextLine()){
-        rnode = new Node();
-        line = input.nextLine();
-        splitline = line.split("\\s+");
-        rnode.x = Double.parseDouble(splitline[0]);
-        rnode.y = Double.parseDouble(splitline[1]);
-        rnodes[n++] = rnode;
-      }
-    }
-    catch(FileNotFoundException e){
-      e.printStackTrace();
-    }
-
-
-    System.out.println(n+" relay nodes configured"); // debug statement
-
-    for(int i = 0; i < rnodes.length; i++){ // debug statement
-      System.out.println("Node "+i+" is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")");
-    }
-  }
-
-  public static void updateNode(int nodeid, double distance){
-    rnodes[nodeid-(nonrnodes+1)].td = distance;
-    if(nodeid == numnodes){
-      locateTarget();
-    }
-  }
-
-  public static void locateTarget(){
-//    for(int i = 0; i < tdistances.length; i++){
-//      System.out.println("Node " + (int)(i+numrelaynodes) + " is " + tdistances[i] + " m away from the target.");
-//    }
-    /*
-    Node 1 at (0,0), Node 2 at (d, 0), Node 3 at (i, j) (i along x axis, j along y axis from Node 1)
-    x = (r1^2 - r2^2 + d^2)/(2*d)
-    y = (r1^2 - r3^2 + j^2 + k^2)/(2*k) - (j*x)/k
-    use distance equation to figure out d, j, k
-    */
-    calculateSmallest(0);
-    int n1 = tnodes[0];
-    int n2 = tnodes[1];
-    int n3 = tnodes[2];
-
-    System.out.println("Calculating using nodes:");
-    System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
-
-    double targetx = 0;
-    double d12 = 0;
-    double d13 = 0;
-    double j = 0;
-    double k = 0;
-    double angle13 = 0;
-    double targety = 0;
-
-    // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
-    d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n2].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n2].y), 2));
-    targetx = (Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12);
-    d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n3].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n3].y), 2));
-    angle13 = Math.atan(Math.abs(rnodes[n1].x - rnodes[n3].x)/Math.abs(rnodes[n1].y - rnodes[n3].y));
-    j = d13*Math.cos(angle13);
-    k = d13*Math.sin(angle13);
-    targety = (Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*Math.abs(targetx))/k;
-
-    //get x and y to line up with real x and y
-
-    // (x,y) relative to n1, add n1 to offset
-    if(rnodes[n1].x < rnodes[n2]){
-      targetx = rnodes[n1].x - targetx;
-    }
-    else{
-      targetx += rnodes[n1].x;
-    }
-//    targetx += rnodes[n1].x;
-//    targety += rnodes[n1].y;
-
-    System.out.println("d12 = "+d12);
-    System.out.println("d13 = "+d13);
-    System.out.println("angle13 = "+angle13);
-    System.out.println("(j, k) = ("+j+", "+k+")");
-
-    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
-    System.out.println();
-
-  }
-
-  public static void calculateSmallest(int mcase){
-    if(mcase == 0){ //tnodes (target nodes)
-      tnodes[0] = 97; // 90's should get phased out as real data spills in, set to 90's for debugging
-      tnodes[1] = 98;
-      tnodes[2] = 99;
-      double min1 = 9997;
-      double min2 = 9998;
-      double min3 = 9999;
-
-      for(int i = 0; i < rnodes.length; i++){
-        if(rnodes[i].td < min1){
-          tnodes[2] = tnodes[1];
-          tnodes[1] = tnodes[0];
-          tnodes[0] = i;
-          min3 = min2;
-          min2 = min1;
-          min1 = rnodes[i].td;
-        }
-        else if(rnodes[i].td < min2){
-          tnodes[2] = tnodes[1];
-          tnodes[1] = i;
-          min3 = min2;
-          min2 = rnodes[i].td;
-        }
-        else if(rnodes[i].td < min3){
-          tnodes[2] = i;
-          min3 = rnodes[i].td;
-        }
-      }
-    }
-    else if(mcase == 1){ //cnodes (car nodes)
-      System.out.println("not yet implemented");
-      // should calculate things for car distances here or something
-    }
-  }
-
 }
