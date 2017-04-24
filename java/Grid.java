@@ -10,8 +10,10 @@ public class Grid{
   private Node[] rnodes;
   private int[] tnodes;
   private int[] cnodes;
+  private Boolean tReady;
   private double targetx;
   private double targety;
+  private Boolean cReady;
   private double carx;
   private double cary;
   private Socket carSocket;
@@ -23,8 +25,10 @@ public class Grid{
     rnodes = new Node[numRNodes];
     tnodes = new int[3];
     cnodes = new int[3];
+    tReady = false;
     targetx = 0;
     targety = 0;
+    cReady = false;
     carx = 0;
     cary = 0;
     initializeNodes();
@@ -152,9 +156,14 @@ public class Grid{
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
 
+    tReady = true;
+    if(tReady && cReady){
+      sendtoCar();
+    }
     for(int i = 0; i < rnodes.length; i++){
       rnodes[i].td = 9999; // reset all distances
     }
+
   }
 
   /*
@@ -164,6 +173,11 @@ public class Grid{
     calculateSmallest(1);
 
 
+
+    cReady = true;
+    if(tReady && cReady){
+      sendtoCar();
+    }
     for(int i = 0; i < rnodes.length; i++){
       rnodes[i].cd = 9999; // reset all distances
     }
@@ -233,6 +247,13 @@ public class Grid{
 
   public void sendtoCar(){
 
+
+    for(int i = 0; i < rnodes.length; i++){
+      rnodes[i].td = 9999; // reset all distances
+      rnodes[i].cd = 9999; // reset all distances
+    }
+    tReady = false;
+    cReady = false;
   }
 
 }
