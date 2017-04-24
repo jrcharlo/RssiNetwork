@@ -153,7 +153,7 @@ public class Grid{
     System.out.println();
 
     for(int i = 0; i < rnodes.length; i++){
-      rnodes[i].td = 9999; // reset all lengths
+      rnodes[i].td = 9999; // reset all distances
     }
   }
 
@@ -162,6 +162,11 @@ public class Grid{
   */
   public void locateCar(){
     calculateSmallest(1);
+
+
+    for(int i = 0; i < rnodes.length; i++){
+      rnodes[i].cd = 9999; // reset all distances
+    }
   }
 
   /*
@@ -227,7 +232,7 @@ public class Grid{
   }
 
   public void sendtoCar(){
-    
+
   }
 
 }
