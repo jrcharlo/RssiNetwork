@@ -50,7 +50,7 @@ public class Trilaterate {
           if(nodeid != 2){
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
-            int a = -45; // dBm at 1 m/Transmission power
+            int a = -52; // dBm at 1 m/Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
           System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
