@@ -32,15 +32,13 @@ public class Grid{
     carx = 0;
     cary = 0;
     initializeNodes();
-    Scanner scan = new Scanner(System.in);
-    System.out.println("Enter car's IP address: ");
-    String carIP = scan.nextLine();
-    try{
-      carSocket = new Socket(carIP, 8989);
-    }
-    catch (Exception e){
-      e.printStackTrace();
-    }
+    String carIP = "192.168.4.1";
+//    try{
+//      carSocket = new Socket(carIP, 8989);
+//    }
+//    catch (Exception e){
+//      e.printStackTrace();
+//    }
   }
 
   /*
@@ -111,47 +109,17 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
 
-    double d12 = 0;
-    double d13 = 0;
-    double j = 0;
-    double k = 0;
-    double angle13 = 0;
-    double targetj = 0;
-    double targetk = 0;
-
-    // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
-    d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n2].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n2].y), 2));
-    d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n3].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n3].y), 2));
-    angle13 = Math.atan(Math.abs(rnodes[n1].y - rnodes[n3].y)/Math.abs(rnodes[n1].x - rnodes[n3].x));
-    j = d13*Math.cos(angle13);
-    k = d13*Math.sin(angle13);
-    // change to be Math.abs()
-    targetj = Math.abs((Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12));
-    targetk = Math.abs((Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*targetj)/k);
-
-//    System.out.println("d12 = "+d12);
-//    System.out.println("d13 = "+d13);
-//    System.out.println("angle13 = "+angle13);
-//    System.out.println("(j, k) = ("+j+", "+k+")");
-
-    //have relative position now convert (j, k) to (x, y)
-    //convert j to x
-    double angle12 = Math.atan(Math.abs(rnodes[n1].y - rnodes[n2].y)/Math.abs(rnodes[n1].x - rnodes[n2].x));
-    if(n1 <= n2){
-      targetx = rnodes[n1].x + (targetj * Math.cos(angle12));
-    }
-    else{
-      targetx = rnodes[n1].x - (targetj * Math.cos(angle12));
-    }
-    //convert k to y
-    double d1t = Math.sqrt(Math.pow(targetj, 2) + Math.pow(targetk, 2));
-    double angle1t = Math.atan(targetk/targetj);
-    if(n1 <= n3){
-      targety = rnodes[n1].y + (d1t * Math.sin(angle12+angle1t));
-    }
-    else{
-      targety = rnodes[n1].y - (d1t * Math.sin(angle12+angle1t));
-    }
+    double a, b, c, d, e, f;
+    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
+    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
+    c = Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+      - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
+    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
+    f = Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+      - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    targetx = ((c*d)+(f*a))/((b*d)+(e*a));
+    targety = ((a*e)+(b*d))/((c*e)+(f*b));
 
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
@@ -246,7 +214,7 @@ public class Grid{
   }
 
   public void sendtoCar(){
-
+    //send stuff to car here using socket
 
     for(int i = 0; i < rnodes.length; i++){
       rnodes[i].td = 9999; // reset all distances
