@@ -181,6 +181,9 @@ implementation{
             }
           }
 //        }
+//          else{
+//            dropBlink();
+//          }
 
         return ret;
       }

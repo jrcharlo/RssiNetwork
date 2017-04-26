@@ -38,7 +38,7 @@ public class Trilaterate {
       reader.open(PrintStreamMessenger.err);
       while(true){
         byte[] packet = reader.readPacket();
-        if(packet.length == 12){
+        if(packet.length == 14){
           byte[] nodeid_b = {0x00,0x00,packet[8],packet[9]};
           byte[] rssi_b = {0x00,0x00,packet[10],packet[11]};
           byte[] onode_b = {0x00,0x00,packet[12],packet[13]};

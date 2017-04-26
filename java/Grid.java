@@ -17,6 +17,7 @@ public class Grid{
   private double carx;
   private double cary;
   private Socket carSocket;
+  private OutputStreamWriter osw;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -33,12 +34,16 @@ public class Grid{
     cary = 0;
     initializeNodes();
     String carIP = "192.168.4.1";
-//    try{
-//      carSocket = new Socket(carIP, 8989);
-//    }
-//    catch (Exception e){
-//      e.printStackTrace();
-//    }
+    try{
+      carSocket = new Socket();//carIP, 8989);
+      carSocket.connect(new InetSocketAddress(carIP, 8989), 5000);
+      osw = new OutputStreamWriter(carSocket.getOutputStream(), "UTF-8");
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
+    sendtoCar();
+    System.exit(-1);
   }
 
   /*
@@ -215,8 +220,15 @@ public class Grid{
 
   public void sendtoCar(){
     //send stuff to car here using socket
-    System.out.println("Sending coordinates to car!");
-
+    System.out.println("Sending msg to car!");
+    String s = "GET /Hello car\r Hello???";
+    try{
+      osw.write(s, 0, s.length());
+    }
+    catch(Exception e){
+      e.printStackTrace();
+    }
+    System.out.println("Msg sent!");
     for(int i = 0; i < rnodes.length; i++){
       rnodes[i].td = 9999; // reset all distances
       rnodes[i].cd = 9999; // reset all distances
