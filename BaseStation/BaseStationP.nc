@@ -159,7 +159,7 @@ implementation{
 
       message_t* receive(message_t *msg, void *payload, uint8_t len) {
         message_t *ret = msg;
-        if(call RadioAMPacket.isForMe(msg)){ // do not process if not for me!
+//        if(call RadioAMPacket.isForMe(msg)){ // do not process if not for me!
           atomic {
             if (!uartFull){
               ret = uartQueue[uartIn];
@@ -180,7 +180,7 @@ implementation{
               dropBlink();
             }
           }
-        }
+//        }
 
         return ret;
       }
