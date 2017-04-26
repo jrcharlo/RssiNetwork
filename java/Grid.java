@@ -113,11 +113,11 @@ public class Grid{
     a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
     b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
     c = Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
-      - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
     d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
     e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
     f = Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
-      - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
     targetx = ((c*d)+(f*a))/((b*d)+(e*a));
     targety = ((a*e)+(b*d))/((c*e)+(f*b));
 
@@ -215,6 +215,7 @@ public class Grid{
 
   public void sendtoCar(){
     //send stuff to car here using socket
+    System.out.println("Sending coordinates to car!");
 
     for(int i = 0; i < rnodes.length; i++){
       rnodes[i].td = 9999; // reset all distances

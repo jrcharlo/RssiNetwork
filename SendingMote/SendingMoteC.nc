@@ -34,6 +34,7 @@ module SendingMoteC {
     RssiMsg *rmsg = (RssiMsg*) call RssiMsgSend.getPayload(&msg, sizeof(RssiMsg));
     rmsg->nodeid = TOS_NODE_ID;
     rmsg->rssi = 0;
+    rmsg->onodeid = TOS_NODE_ID;
     call RssiMsgSend.send((am_addr_t) rnode, &msg, sizeof(RssiMsg));
   }
 

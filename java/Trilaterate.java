@@ -41,19 +41,21 @@ public class Trilaterate {
         if(packet.length == 12){
           byte[] nodeid_b = {0x00,0x00,packet[8],packet[9]};
           byte[] rssi_b = {0x00,0x00,packet[10],packet[11]};
+          byte[] onode_b = {0x00,0x00,packet[12],packet[13]};
 
           if(packet[10] == (byte)0xFF){
             rssi_b[0] = (byte)0xFF;
             rssi_b[1] = (byte)0xFF;
           }
           int nodeid = ByteBuffer.wrap(nodeid_b).getInt();
-          if(nodeid != 2){
+          if(nodeid != 2){ // should no longer be necessary?!
+            int onode = ByteBuffer.wrap(onode_b).getInt(); // this is the original node (2 = target)
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
-            int a = -52; // dBm at 1 m/Transmission power
+            int a = -52; // dBm at 1 m / Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
-          System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
+            System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
             grid.updateNodeDistance(nodeid, d, 0); // update target distance
           }
           System.out.flush();
