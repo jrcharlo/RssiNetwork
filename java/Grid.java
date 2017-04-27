@@ -34,7 +34,6 @@ public class Grid{
     cary = 70.0;
     initializeNodes();
     carIP = "192.168.4.1";
-    sendtoCar(); // debug purposes
   }
 
   /*
@@ -209,8 +208,11 @@ public class Grid{
     }
   }
 
+  /*
+  * Sends data to the car via TCP socket, car is running a server on port 8989.
+  * Method should only be called when data is ready.
+  */
   public void sendtoCar(){
-    //send stuff to car here using socket
     try{
       carSocket = new Socket();
       carSocket.connect(new InetSocketAddress(carIP, 8989), 5000);
