@@ -48,7 +48,7 @@ public class Trilaterate {
             rssi_b[1] = (byte)0xFF;
           }
           int nodeid = ByteBuffer.wrap(nodeid_b).getInt();
-          if(nodeid != 2){ // should no longer be necessary?!
+          if(nodeid != 2){ // do not consider target/car packets
             int onode = ByteBuffer.wrap(onode_b).getInt(); // this is the original node (2 = target)
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
@@ -56,7 +56,12 @@ public class Trilaterate {
             double n = 2.7; // propagation constant [2, 2.7]
             double d = Math.pow(10, ((a - rssi_dbm)/(10*n)));
             System.out.println("Node " + nodeid + " is " + d + " m away from the target. (" + rssi_dbm + "dBm)");
-            grid.updateNodeDistance(nodeid, d, 0); // update target distance
+            if(onode == 2){
+              grid.updateNodeDistance(nodeid, d, 0); // update target distance
+            }
+            else{
+              grid.updateNodeDistance(nodeid, d, 1); // update car distance
+            }
           }
           System.out.flush();
         }

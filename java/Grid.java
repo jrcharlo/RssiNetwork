@@ -134,8 +134,27 @@ public class Grid{
   */
   public void locateCar(){
     calculateSmallest(1);
+    int n1 = cnodes[0];
+    int n2 = cnodes[1];
+    int n3 = cnodes[2];
 
+    System.out.println("Calculating using nodes:");
+    System.out.println(cnodes[0] + " " + cnodes[1] + " " + cnodes[2]);
 
+    double a, b, c, d, e, f;
+    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
+    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
+    c = Math.pow(rnodes[n1].cd, 2) - Math.pow(rnodes[n2].cd, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
+    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
+    f = Math.pow(rnodes[n2].cd, 2) - Math.pow(rnodes[n3].cd, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    carx = ((c*d)+(f*a))/((b*d)+(e*a));
+    cary = ((a*e)+(b*d))/((c*e)+(f*b));
+
+    System.out.println("Car is at (x,y) = ("+carx+", "+cary+").");
+    System.out.println();
 
     cReady = true;
     if(tReady && cReady){
