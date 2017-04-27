@@ -218,7 +218,7 @@ public class Grid{
       carSocket.connect(new InetSocketAddress(carIP, 8989), 5000);
       DataOutputStream dos = new DataOutputStream(carSocket.getOutputStream());
 
-      String coords = carx+" "+cary+" "+targetx+" "+targety+" "; //null terminating " " is important! car relies on it
+      String coords = carx+" "+cary+" "+targetx+" "+targety+" "; //null terminating " " is important! CarServer relies on it!
       dos.writeBytes(coords);
 
       carSocket.close();
