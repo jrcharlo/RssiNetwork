@@ -19,8 +19,8 @@ public class Grid{
   private String carIP;
   private Socket carSocket;
   private char[][] grid;
-  private int maxX;
-  private int maxY;
+  private int maxR;
+  private int maxC;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -30,13 +30,14 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 9.0;
-    targety = 0.57;
+    targetx = 0.17;
+    targety = 0.05;
     cReady = false;
-    carx = 8.02;
-    cary = 70.0;
+    carx = 0.00;
+    cary = 0.01;
     initializeNodes();
     carIP = "192.168.4.1";
+    initializeGrid();
   }
 
   /*
@@ -258,41 +259,40 @@ public class Grid{
   }
 
   public void initializeGrid(){
-    maxX = 40; //cm
-    maxY = 20; //cm
-    maxX++; maxY++;
-    grid = new char[maxY][2*(maxX)];
-    for(int i = 0; i <= 2*maxX-1; i+=2){
-      for(int j = 0; j <= maxY-1; j++){
-        if(i == 200*targetx && j == 100*targety){
-          grid[j][i] = 'T';
-          grid[j][i+1] = 'T';
-        }
-        else{
-          grid[j][i] = '{';
-          grid[j][i+1] = '}';
-        }
+    maxR = 40; //cm (rows represent y-axis)
+    maxC = 50; //cm (columns represent x-axis)
+    maxR++; maxC++;
+    grid = new char[maxC][2*(maxR)];
+    for(int i = 0; i <= 2*maxR-1; i+=2){
+      for(int j = 0; j <= maxC-1; j++){
+        grid[j][i] = '{';
+        grid[j][i+1] = '}';
       }
     }
-
+    printGrid();
+    grid[(int)(100*targety)][(int)(200*targetx)] = 'T';
+    grid[(int)(100*targety)][(int)(200*targetx+1)] = 'T';
+    printGrid();
+    grid[(int)(100*cary)][(int)(200*carx)] = 'C';
+    grid[(int)(100*cary)][(int)(200*carx+1)] = 'C';
     printGrid();
   }
 
   public void printGrid(){
-  String xrow = new String(new char[4+(2*maxX)]).replace('\0', 'X');
-  System.out.println(xrow);
-  for(int i = 0; i <= 2*maxX-1; i+=2){
-    for(int j = 0; j <= maxY-1; j++){
+  String xrow = new String(new char[4+(2*maxC)]).replace('\0', 'X');
+  System.out.println('\f'+xrow);
+  for(int i = 2*maxR-2; i >= 0; i-=2){
+    for(int j = 0; j <= maxC-1; j++){
         if(j == 0){
           System.out.print("XX");
-          System.out.print(grid[i][j]+""+grid[i+1][j]);
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
         }
-        else if(j == maxY-1){
-          System.out.print(grid[i][j]+""+grid[i+1][j]);
+        else if(j == maxC-1){
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
           System.out.print("XX");
         }
         else{
-          System.out.print(grid[i][j]+""+grid[i+1][j]);
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
         }
       }
       System.out.println();
@@ -300,7 +300,7 @@ public class Grid{
     System.out.println(xrow);
 
     System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
-    System.out.println("Car (TC) location: ("+targetx+", "+targety+").");
+    System.out.println("Car (TC) location: ("+carx+", "+cary+").");
   }
 
 }
