@@ -108,6 +108,9 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
 
+    grid[(int)(100*targety)][(int)(200*targetx)] = ' ';
+    grid[(int)(100*targety)][(int)(200*targetx+1)] = ' ';
+
     double a, b, c, d, e, f;
     a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
     b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
@@ -124,6 +127,9 @@ public class Grid{
     System.out.println();
 
     tReady = true;
+    grid[(int)(100*targety)][(int)(200*targetx)] = 'T';
+    grid[(int)(100*targety)][(int)(200*targetx+1)] = 'T';
+    printGrid();
     if(tReady && cReady){
       sendtoCar();
     }
@@ -145,6 +151,9 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(cnodes[0] + " " + cnodes[1] + " " + cnodes[2]);
 
+    grid[(int)(100*cary)][(int)(200*carx)] = ' ';
+    grid[(int)(100*cary)][(int)(200*carx+1)] = ' ';
+
     double a, b, c, d, e, f;
     a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
     b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
@@ -161,6 +170,9 @@ public class Grid{
     System.out.println();
 
     cReady = true;
+    grid[(int)(100*cary)][(int)(200*carx)] = 'C';
+    grid[(int)(100*cary)][(int)(200*carx+1)] = 'C';
+    printGrid();
     if(tReady && cReady){
       sendtoCar();
     }
@@ -265,17 +277,10 @@ public class Grid{
     grid = new char[maxC][2*(maxR)];
     for(int i = 0; i <= 2*maxR-1; i+=2){
       for(int j = 0; j <= maxC-1; j++){
-        grid[j][i] = '{';
-        grid[j][i+1] = '}';
+        grid[j][i] = ' ';
+        grid[j][i+1] = ' ';
       }
     }
-    printGrid();
-    grid[(int)(100*targety)][(int)(200*targetx)] = 'T';
-    grid[(int)(100*targety)][(int)(200*targetx+1)] = 'T';
-    printGrid();
-    grid[(int)(100*cary)][(int)(200*carx)] = 'C';
-    grid[(int)(100*cary)][(int)(200*carx+1)] = 'C';
-    printGrid();
   }
 
   public void printGrid(){
