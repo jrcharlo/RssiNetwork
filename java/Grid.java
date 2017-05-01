@@ -305,7 +305,7 @@ public class Grid{
     System.out.println(xrow);
 
     System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
-    System.out.println("Car (TC) location: ("+carx+", "+cary+").");
+    System.out.println("Car (CC) location: ("+carx+", "+cary+").");
   }
 
 }
