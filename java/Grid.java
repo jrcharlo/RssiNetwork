@@ -21,6 +21,7 @@ public class Grid{
   private char[][] grid;
   private int maxR;
   private int maxC;
+  private int res;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -36,8 +37,9 @@ public class Grid{
     carx = 5.00;
     cary = 5.00;
     carIP = "192.168.4.1";
-    maxR = 50; //cm (rows represent y-axis)
-    maxC = 100; //cm (columns represent x-axis)
+    maxR = 40; // 5cm (rows represent y-axis)
+    maxC = 40; // 5cm (columns represent x-axis)
+    res = 5;
     initializeGrid();
     initializeNodes();
   }
@@ -307,18 +309,18 @@ public class Grid{
   }
 
   public void placeNode(int x, int y, int id){
-    grid[x][2*y] = 'N';
-    grid[x][2*y+1] = (char)(id+48);
+    grid[x/res][(2*y)/res] = 'N';
+    grid[x/res][(2*y)/res+1] = (char)(id+48);
   }
 
   public void updateTargetLoc(char c){
-    grid[(int)(targetx)][(int)(2*targety)] = c;
-    grid[(int)(targetx)][(int)(2*targety+1)] = c;
+    grid[(int)(targetx)/res][(int)(2*targety)/res] = c;
+    grid[(int)(targetx)/res][(int)(2*targety)/res+1] = c;
   }
 
   public void updateCarLoc(char c){
-    grid[(int)(carx)][(int)(2*cary)] = c;
-    grid[(int)(carx)][(int)(2*cary+1)] = c;
+    grid[(int)(carx)/res][(int)(2*cary)/res] = c;
+    grid[(int)(carx)/res][(int)(2*cary)/res+1] = c;
   }
 
   public void printGrid(){
@@ -347,7 +349,7 @@ public class Grid{
     }
     System.out.println(xrow);
     System.out.println(brow);
-    System.out.println("Grid resolution is 10 cm. Legend: 'Y' is 10 cm, 'XX' is 10 cm.\n");
+    System.out.println("Grid resolution is 5 cm. Legend: 'Y' is 5 cm, 'XX' is 5 cm.\n");
     System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
     System.out.println("Car (CC) location: ("+carx+", "+cary+").");
   }
