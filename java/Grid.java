@@ -30,14 +30,18 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 0.17;
-    targety = 0.05;
+    targetx = 15.17;
+    targety = 5.05;
     cReady = false;
-    carx = 0.00;
-    cary = 0.01;
-    initializeNodes();
+    carx = 2.00;
+    cary = 3.00;
     carIP = "192.168.4.1";
+    maxR = 50; //cm (rows represent y-axis)
+    maxC = 100; //cm (columns represent x-axis)
     initializeGrid();
+    initializeNodes();
+
+    System.exit(1); //testing
   }
 
   /*
@@ -73,7 +77,9 @@ public class Grid{
       rnodes[i].td = 9999;
       rnodes[i].cd = 9999;
       System.out.println("Node "+i+" is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")"); // debug statement
+      placeNode((int)rnodes[i].x, (int)rnodes[i].y, i+numNonRNodes); // remove numNonRNodes if want relative id displayed
     }
+    printGrid();
   }
 
   /*
@@ -108,27 +114,37 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
 
-    grid[(int)(100*targety)][(int)(200*targetx)] = ' ';
-    grid[(int)(100*targety)][(int)(200*targetx+1)] = ' ';
+    updateTargetLoc(' ');
 
     double a, b, c, d, e, f;
-    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
-    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
-    c = Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
-        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
-    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
-    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
-    f = Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
-        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    a = Math.abs((-2*rnodes[n1].x) + (2*rnodes[n2].x));
+    b = Math.abs((-2*rnodes[n1].y) + (2*rnodes[n2].y));
+    c = Math.abs(Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2));
+    d = Math.abs((-2*rnodes[n2].x) + (2*rnodes[n3].x));
+    e = Math.abs((-2*rnodes[n2].y) + (2*rnodes[n3].y));
+    f = Math.abs(Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2));
     targetx = ((c*d)+(f*a))/((b*d)+(e*a));
     targety = ((a*e)+(b*d))/((c*e)+(f*b));
 
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
+    if(targetx < 0){
+      targetx = 0;
+    }
+    else if(targetx > maxC){
+      targetx = maxC;
+    }
+    if(targety < 0){
+      targety = 0;
+    }
+    else if(cary > maxR){
+      cary = maxR;
+    }
 
     tReady = true;
-    grid[(int)(100*targety)][(int)(200*targetx)] = 'T';
-    grid[(int)(100*targety)][(int)(200*targetx+1)] = 'T';
+    updateTargetLoc('T');
     printGrid();
     if(tReady && cReady){
       sendtoCar();
@@ -151,8 +167,7 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(cnodes[0] + " " + cnodes[1] + " " + cnodes[2]);
 
-    grid[(int)(100*cary)][(int)(200*carx)] = ' ';
-    grid[(int)(100*cary)][(int)(200*carx+1)] = ' ';
+    updateCarLoc(' ');
 
     double a, b, c, d, e, f;
     a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
@@ -168,10 +183,21 @@ public class Grid{
 
     System.out.println("Car is at (x,y) = ("+carx+", "+cary+").");
     System.out.println();
+    if(carx < 0){
+      carx = 0;
+    }
+    else if(carx > maxC){
+      carx = maxC;
+    }
+    if(cary < 0){
+      cary = 0;
+    }
+    else if(cary > maxR){
+      cary = maxR;
+    }
 
     cReady = true;
-    grid[(int)(100*cary)][(int)(200*carx)] = 'C';
-    grid[(int)(100*cary)][(int)(200*carx+1)] = 'C';
+    updateCarLoc('C');
     printGrid();
     if(tReady && cReady){
       sendtoCar();
@@ -271,8 +297,6 @@ public class Grid{
   }
 
   public void initializeGrid(){
-    maxR = 40; //cm (rows represent y-axis)
-    maxC = 50; //cm (columns represent x-axis)
     maxR++; maxC++;
     grid = new char[maxC][2*(maxR)];
     for(int i = 0; i <= 2*maxR-1; i+=2){
@@ -281,20 +305,42 @@ public class Grid{
         grid[j][i+1] = ' ';
       }
     }
+    printGrid();
+    updateTargetLoc('T');
+    updateCarLoc('C');
+    printGrid();
+  }
+
+  public void placeNode(int x, int y, int id){
+    grid[x][2*y] = 'N';
+    grid[x][2*y+1] = (char)(id+48);
+  }
+
+  public void updateTargetLoc(char c){
+    grid[(int)(targetx)][(int)(2*targety)] = c;
+    grid[(int)(targetx)][(int)(2*targety+1)] = c;
+  }
+
+  public void updateCarLoc(char c){
+    grid[(int)(carx)][(int)(2*cary)] = c;
+    grid[(int)(carx)][(int)(2*cary+1)] = c;
   }
 
   public void printGrid(){
-  String xrow = new String(new char[4+(2*maxC)]).replace('\0', 'X');
-  System.out.println('\f'+xrow);
+  String xrow = "0" + new String(new char[(2*maxC)]).replace('\0', 'X');
+  System.out.print("\033[H\033[2J");
+  System.out.flush();
+//  System.out.println(xrow);
   for(int i = 2*maxR-2; i >= 0; i-=2){
     for(int j = 0; j <= maxC-1; j++){
         if(j == 0){
-          System.out.print("XX");
+//          System.out.print("XX");
+          System.out.print("Y");
           System.out.print(grid[j][i]+""+grid[j][i+1]);
         }
         else if(j == maxC-1){
           System.out.print(grid[j][i]+""+grid[j][i+1]);
-          System.out.print("XX");
+//          System.out.print("XX");
         }
         else{
           System.out.print(grid[j][i]+""+grid[j][i+1]);
@@ -303,7 +349,7 @@ public class Grid{
       System.out.println();
     }
     System.out.println(xrow);
-
+    System.out.println("Legend: 'Y' is 10 cm, 'X' is 5 cm.\n");
     System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
     System.out.println("Car (CC) location: ("+carx+", "+cary+").");
   }
