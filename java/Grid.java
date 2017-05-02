@@ -75,7 +75,7 @@ public class Grid{
       rnodes[i].td = 9999;
       rnodes[i].cd = 9999;
       System.out.println("Node "+i+" is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")"); // debug statement
-      placeNode((int)rnodes[i].x, (int)rnodes[i].y, i+numNonRNodes); // remove numNonRNodes if want relative id displayed
+      placeNode((int)rnodes[i].x, (int)rnodes[i].y, i+numNonRNodes+1); // remove numNonRNodes if want relative id displayed
     }
     printGrid();
   }
