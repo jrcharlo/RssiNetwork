@@ -55,7 +55,7 @@ public class Trilaterate {
             int a = -51; // dBm at 1 m / Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = 100*Math.pow(10, ((a - rssi_dbm)/(10*n)));
-            System.out.println("Node "+ nodeid +" is "+ d +" cm away from node "+ onodeid +". (" + rssi_dbm + "dBm)");
+            System.out.println("Node "+ nodeid +" is "+ d +" cm away from node "+ onode +". (" + rssi_dbm + "dBm)");
             if(onode == 2){
               grid.updateNodeDistance(nodeid, d, 0); // update target distance
             }
