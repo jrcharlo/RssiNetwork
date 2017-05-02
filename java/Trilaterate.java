@@ -48,7 +48,7 @@ public class Trilaterate {
             rssi_b[1] = (byte)0xFF;
           }
           int nodeid = ByteBuffer.wrap(nodeid_b).getInt();
-          if(nodeid != 2 && nodeid != 3){ // do not consider target/car packets
+          if(nodeid > numNonRNodes){ // do not consider target/car packets
             int onode = ByteBuffer.wrap(onode_b).getInt(); // this is the original node (2 = target)
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
