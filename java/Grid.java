@@ -40,8 +40,6 @@ public class Grid{
     maxC = 100; //cm (columns represent x-axis)
     initializeGrid();
     initializeNodes();
-
-    System.exit(1); //testing
   }
 
   /*
@@ -306,9 +304,6 @@ public class Grid{
       }
     }
     printGrid();
-    updateTargetLoc('T');
-    updateCarLoc('C');
-    printGrid();
   }
 
   public void placeNode(int x, int y, int id){
@@ -327,19 +322,21 @@ public class Grid{
   }
 
   public void printGrid(){
-  String xrow = "0" + new String(new char[(2*maxC)]).replace('\0', 'X');
+  String xrow = "#X" + new String(new char[(2*maxC)]).replace('\0', 'X') + "#";
+  String brow = "###" + new String(new char[(2*maxC)]).replace('\0', '#');
   System.out.print("\033[H\033[2J");
   System.out.flush();
-//  System.out.println(xrow);
+  System.out.println(brow);
   for(int i = 2*maxR-2; i >= 0; i-=2){
     for(int j = 0; j <= maxC-1; j++){
         if(j == 0){
 //          System.out.print("XX");
-          System.out.print("Y");
+          System.out.print("#Y");
           System.out.print(grid[j][i]+""+grid[j][i+1]);
         }
         else if(j == maxC-1){
           System.out.print(grid[j][i]+""+grid[j][i+1]);
+          System.out.print("#");
 //          System.out.print("XX");
         }
         else{
@@ -349,7 +346,8 @@ public class Grid{
       System.out.println();
     }
     System.out.println(xrow);
-    System.out.println("Legend: 'Y' is 10 cm, 'X' is 5 cm.\n");
+    System.out.println(brow);
+    System.out.println("Grid resolution is 10 cm. Legend: 'Y' is 10 cm, 'XX' is 10 cm.\n");
     System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
     System.out.println("Car (CC) location: ("+carx+", "+cary+").");
   }
