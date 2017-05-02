@@ -35,7 +35,7 @@ void loop() {
   Serial.println("Client connected!");
   
   String coords = client.readString();
-  Serial.println(coords);
+//  Serial.println(coords);
   
   client.flush();
 
@@ -60,25 +60,25 @@ void loop() {
   while(coords[i] != ' '){
     syf += coords[i++];
   }
-
+/*
   Serial.println("Strings received:");
   Serial.println(sxi);
   Serial.println(syi);
   Serial.println(sxf);
-  Serial.println(syf);
+  Serial.println(syf);*/
   xi = sxi.toInt();
   yi = syi.toInt();
   xf = sxf.toInt();
   yf = syf.toInt();
-  Serial.println("Ints received:");
+/*  Serial.println("Ints received:");
   Serial.println(xi);
   Serial.println(yi);
   Serial.println(xf);
-  Serial.println(yf);
+  Serial.println(yf);*/
   sendCoordinates();
 
   delay(1);
-  Serial.println("Client disconnected");
+  Serial.println("Client disconnected\n");
 }
 
 void sendCoordinates(){
@@ -119,9 +119,9 @@ void sendCoordinates(){
       digitalWrite(yfp, LOW);
     }
 
-    delay(50);
-    digitalWrite(tx, 1);
     delay(100);
+    digitalWrite(tx, 1);
+    delay(150);
   }
 }
 

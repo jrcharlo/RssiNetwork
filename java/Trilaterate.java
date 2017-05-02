@@ -6,7 +6,7 @@ import java.lang.Math.*;
 import java.util.*;
 
 public class Trilaterate {
-  static int numNodes = 7; // total number of nodes
+  static int numNodes = 8; // total number of nodes
   static int numNonRNodes = 3; // number of sending motes + base station (not relay nodes)
   static int numRNodes = numNodes - numNonRNodes;
   static Grid grid = new Grid(numNodes, numNonRNodes, numRNodes);
@@ -52,7 +52,7 @@ public class Trilaterate {
             int onode = ByteBuffer.wrap(onode_b).getInt(); // this is the original node (2 = target)
             int rssi = ByteBuffer.wrap(rssi_b).getInt();
             int rssi_dbm = rssi - 45;
-            int a = -51; // dBm at 1 m / Transmission power
+            int a = -54; // dBm at 1 m / Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
             double d = 100*Math.pow(10, ((a - rssi_dbm)/(10*n)));
             System.out.println("Node "+ nodeid +" is "+ d +" cm away from node "+ onode +". (" + rssi_dbm + "dBm)");

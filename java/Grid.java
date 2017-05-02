@@ -19,9 +19,11 @@ public class Grid{
   private String carIP;
   private Socket carSocket;
   private char[][] grid;
+  private int maxY;
+  private int maxX;
+  private int res;
   private int maxR;
   private int maxC;
-  private int res;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -31,15 +33,17 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 10.17;
-    targety = 5.05;
+    targetx = 10.0;
+    targety = 0.0;
     cReady = false;
-    carx = 5.00;
-    cary = 5.00;
+    carx = 0.0;
+    cary = 0.0;
     carIP = "192.168.4.1";
-    maxR = 40; // 5cm (rows represent y-axis)
-    maxC = 40; // 5cm (columns represent x-axis)
+    maxX = 200;
+    maxY = 200;
     res = 5;
+    maxR = maxY/res; // 5cm (rows represent y-axis)
+    maxC = maxX/res; // 5cm (columns represent x-axis)
     initializeGrid();
     initializeNodes();
   }
@@ -117,31 +121,43 @@ public class Grid{
     updateTargetLoc(' ');
 
     double a, b, c, d, e, f;
-    a = Math.abs((-2*rnodes[n1].x) + (2*rnodes[n2].x));
-    b = Math.abs((-2*rnodes[n1].y) + (2*rnodes[n2].y));
-    c = Math.abs(Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
-        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2));
-    d = Math.abs((-2*rnodes[n2].x) + (2*rnodes[n3].x));
-    e = Math.abs((-2*rnodes[n2].y) + (2*rnodes[n3].y));
-    f = Math.abs(Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
-        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2));
-    targetx = ((c*d)+(f*a))/((b*d)+(e*a));
-    targety = ((a*e)+(b*d))/((c*e)+(f*b));
+    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
+    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
+    c = Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
+    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
+    f = Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    a = Math.abs(a);
+    b = Math.abs(b);
+    c = Math.abs(c);
+    d = Math.abs(d);
+    e = Math.abs(e);
+    f = Math.abs(f);
+    targetx = ((f*b)-(e*c))/((b*d)-(e*a));
+    targety = ((a*e)-(c*d))/((a*e)-(d*b));
+//    targetx = ((c*d)-(f*a))/((b*d)-(e*a));
+//    targety = ((a*e)-(d*b))/((c*e)-(f*b));
+
+    targetx = Math.abs(targetx);
+    targety = Math.abs(targety);
 
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
-    System.out.println();
     if(targetx < 0){
       targetx = 0;
     }
-    else if(targetx > maxC){
-      targetx = maxC;
+    else if(targetx > maxX){
+      targetx = maxX;
     }
     if(targety < 0){
       targety = 0;
     }
-    else if(cary > maxR){
-      cary = maxR;
+    else if(targety > maxY){
+      targety = maxY;
     }
+    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
+    System.out.println();
 
     tReady = true;
     updateTargetLoc('T');
@@ -186,14 +202,14 @@ public class Grid{
     if(carx < 0){
       carx = 0;
     }
-    else if(carx > maxC){
-      carx = maxC;
+    else if(carx > maxR){
+      carx = maxR;
     }
     if(cary < 0){
       cary = 0;
     }
-    else if(cary > maxR){
-      cary = maxR;
+    else if(cary > maxY){
+      cary = maxY;
     }
 
     cReady = true;
@@ -315,7 +331,7 @@ public class Grid{
 
   public void updateTargetLoc(char c){
     grid[(int)(targetx)/res][(int)(2*targety)/res] = c;
-    grid[(int)(targetx)/res][(int)(2*targety)/res+1] = c;
+//    grid[(int)(targetx)/res][(int)(2*targety)/res+1] = c;
   }
 
   public void updateCarLoc(char c){
