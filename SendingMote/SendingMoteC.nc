@@ -16,9 +16,9 @@ module SendingMoteC {
   float send_interval;
 
   event void Boot.booted(){
-    rnode  = 3; // first relay node
+    rnode  = 4; // first relay node
     numnodes = 7;
-    numrelaynodes = numnodes - 2;
+    numrelaynodes = numnodes - 3;
     send_interval = 1000/numrelaynodes;
     call RadioControl.start();
   }
