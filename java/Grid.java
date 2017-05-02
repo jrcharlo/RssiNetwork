@@ -30,11 +30,11 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 15.17;
+    targetx = 10.17;
     targety = 5.05;
     cReady = false;
-    carx = 2.00;
-    cary = 3.00;
+    carx = 5.00;
+    cary = 5.00;
     carIP = "192.168.4.1";
     maxR = 50; //cm (rows represent y-axis)
     maxC = 100; //cm (columns represent x-axis)
