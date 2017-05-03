@@ -9,6 +9,13 @@ public class Trilaterate {
   static int numNodes = 8; // total number of nodes
   static int numNonRNodes = 3; // number of sending motes + base station (not relay nodes)
   static int numRNodes = numNodes - numNonRNodes;
+  static int[] tds = new int[numRNodes];
+  static int[] ntds = new int[numRNodes];
+  static int[] cds = new int[numRNodes];
+  static int[] ncds = new int[numRNodes];
+  static int nds_max = 5;
+  static int tcount = 0;
+  static int ccount = 0;
   static Grid grid = new Grid(numNodes, numNonRNodes, numRNodes);
 
   public static void main(String args[]) throws IOException {
@@ -54,13 +61,41 @@ public class Trilaterate {
             int rssi_dbm = rssi - 45;
             int a = -54; // dBm at 1 m / Transmission power
             double n = 2.7; // propagation constant [2, 2.7]
-            double d = 100*Math.pow(10, ((a - rssi_dbm)/(10*n)));
-            System.out.println("Node "+ nodeid +" is "+ d +" cm away from node "+ onode +". (" + rssi_dbm + "dBm)");
+//            double d = 100*Math.pow(10, ((a - rssi_dbm)/(10*n)));
+//            System.out.println("Node "+ nodeid +" is "+ d +" cm away from node "+ onode +". (" + rssi_dbm + "dBm)");
             if(onode == 2){
-              grid.updateNodeDistance(nodeid, d, 0); // update target distance
+//              grid.updateNodeDistance(nodeid, d, 0); // update target distance
+              if(tcount < nds_max){
+                tds[nodeid-numNonRNodes-1] += rssi_dbm;
+                ntds[nodeid-numNonRNodes-1]++;
+                if(nodeid == numRNodes){
+                  tcount++;
+                }
+              }
+              if(tcount == nds_max){
+                for(int i = 0; i < numRNodes; i++){
+                  double rssi_avg = tds[i]/ntds[i];
+                  double d = Math.pow(10, ((a - rssi_avg)/(10*n)));
+                  grid.updateNodeDistance(i+numNonRNodes+1, d, 0);
+                }
+              }
             }
             else{
-              grid.updateNodeDistance(nodeid, d, 1); // update car distance
+//              grid.updateNodeDistance(nodeid, d, 1); // update car distance
+              if(ccount < nds_max){
+                cds[nodeid-numNonRNodes-1] += rssi_dbm;
+                ncds[nodeid-numNonRNodes-1]++;
+                if(nodeid == numRNodes){
+                  ccount++;
+                }
+              }
+              if(ccount == nds_max){
+                for(int i = 0; i < numRNodes; i++){
+                  double rssi_avg = cds[i]/ncds[i];
+                  double d = Math.pow(10, ((a - rssi_avg)/(10*n)));
+                  grid.updateNodeDistance(i+numNonRNodes+1, d, 1);
+                }
+              }
             }
           }
           System.out.flush();
