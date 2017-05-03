@@ -16,9 +16,9 @@ module SendingMoteC {
   float send_interval;
 
   event void Boot.booted(){
-    rnode  = 3; // first relay node
-    numnodes = 7;
-    numrelaynodes = numnodes - 2;
+    rnode  = 4; // first relay node
+    numnodes = 8;
+    numrelaynodes = numnodes - 3;
     send_interval = 1000/numrelaynodes;
     call RadioControl.start();
   }
@@ -34,6 +34,7 @@ module SendingMoteC {
     RssiMsg *rmsg = (RssiMsg*) call RssiMsgSend.getPayload(&msg, sizeof(RssiMsg));
     rmsg->nodeid = TOS_NODE_ID;
     rmsg->rssi = 0;
+    rmsg->onodeid = TOS_NODE_ID;
     call RssiMsgSend.send((am_addr_t) rnode, &msg, sizeof(RssiMsg));
   }
 

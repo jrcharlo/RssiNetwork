@@ -162,24 +162,24 @@ implementation
     message_t *ret = msg;
 
     atomic {
-      if (!uartFull){
-    	  ret = uartQueue[uartIn];
-    	  uartQueue[uartIn] = msg;
+      if (!uartFull)
+	{
+	  ret = uartQueue[uartIn];
+	  uartQueue[uartIn] = msg;
 
-    	  uartIn = (uartIn + 1) % UART_QUEUE_LEN;
+	  uartIn = (uartIn + 1) % UART_QUEUE_LEN;
 
-    	  if (uartIn == uartOut){
-    	     uartFull = TRUE;
-        }
+	  if (uartIn == uartOut)
+	    uartFull = TRUE;
 
-    	  if (!uartBusy){
-  	       post uartSendTask();
-  	       uartBusy = TRUE;
-    	  }
+	  if (!uartBusy)
+	    {
+	      post uartSendTask();
+	      uartBusy = TRUE;
 	    }
-      else{
-	       dropBlink();
-      }
+	}
+      else
+	dropBlink();
     }
 
     return ret;
@@ -313,4 +313,4 @@ implementation
 
     post radioSendTask();
   }
-}
+}  

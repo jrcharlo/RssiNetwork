@@ -1,6 +1,7 @@
 import java.io.*;
 import java.lang.Math.*;
 import java.util.*;
+import java.net.*;
 
 public class Grid{
   private int numNodes;
@@ -9,10 +10,20 @@ public class Grid{
   private Node[] rnodes;
   private int[] tnodes;
   private int[] cnodes;
+  private Boolean tReady;
   private double targetx;
   private double targety;
+  private Boolean cReady;
   private double carx;
   private double cary;
+  private String carIP;
+  private Socket carSocket;
+  private char[][] grid;
+  private int maxY;
+  private int maxX;
+  private int res;
+  private int maxR;
+  private int maxC;
 
   public Grid(int nn, int nnrn, int nrn){
     numNodes = nn;
@@ -21,10 +32,19 @@ public class Grid{
     rnodes = new Node[numRNodes];
     tnodes = new int[3];
     cnodes = new int[3];
-    targetx = 0;
-    targety = 0;
-    carx = 0;
-    cary = 0;
+    tReady = false;
+    targetx = 10.0;
+    targety = 0.0;
+    cReady = false;
+    carx = 0.0;
+    cary = 0.0;
+    carIP = "192.168.4.1";
+    maxX = 200;
+    maxY = 200;
+    res = 5;
+    maxR = maxY/res; // 5cm (rows represent y-axis)
+    maxC = maxX/res; // 5cm (columns represent x-axis)
+    initializeGrid();
     initializeNodes();
   }
 
@@ -61,7 +81,9 @@ public class Grid{
       rnodes[i].td = 9999;
       rnodes[i].cd = 9999;
       System.out.println("Node "+i+" is at(x,y): ("+rnodes[i].x+", "+rnodes[i].y+")"); // debug statement
+      placeNode((int)rnodes[i].x, (int)rnodes[i].y, i+numNonRNodes+1); // remove numNonRNodes if want relative id displayed
     }
+    printGrid();
   }
 
   /*
@@ -96,55 +118,57 @@ public class Grid{
     System.out.println("Calculating using nodes:");
     System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
 
-    double d12 = 0;
-    double d13 = 0;
-    double j = 0;
-    double k = 0;
-    double angle13 = 0;
-    double targetj = 0;
-    double targetk = 0;
+    updateTargetLoc(' ');
 
-    // d12 = sqrt((x1-x2)^2 + (y1-y2)^2)
-    d12 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n2].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n2].y), 2));
-    d13 = Math.sqrt(Math.pow(Math.abs(rnodes[n1].x - rnodes[n3].x), 2) + Math.pow(Math.abs(rnodes[n1].y - rnodes[n3].y), 2));
-    angle13 = Math.atan(Math.abs(rnodes[n1].y - rnodes[n3].y)/Math.abs(rnodes[n1].x - rnodes[n3].x));
-    j = d13*Math.cos(angle13);
-    k = d13*Math.sin(angle13);
-    // change to be Math.abs()
-    targetj = Math.abs((Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) + Math.pow(d12, 2))/(2*d12));
-    targetk = Math.abs((Math.pow(rnodes[n1].td,2) - Math.pow(rnodes[n3].td,2) + Math.pow(j,2) + Math.pow(k,2))/(2*k) - (j*targetj)/k);
+    double a, b, c, d, e, f;
+    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
+    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
+    c = Math.pow(rnodes[n1].td, 2) - Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
+    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
+    f = Math.pow(rnodes[n2].td, 2) - Math.pow(rnodes[n3].td, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    a = Math.abs(a);
+    b = Math.abs(b);
+    c = Math.abs(c);
+    d = Math.abs(d);
+    e = Math.abs(e);
+    f = Math.abs(f);
+    targetx = ((f*b)-(e*c))/((b*d)-(e*a));
+    targety = ((a*e)-(c*d))/((a*e)-(d*b));
+//    targetx = ((c*d)-(f*a))/((b*d)-(e*a));
+//    targety = ((a*e)-(d*b))/((c*e)-(f*b));
 
-//    System.out.println("d12 = "+d12);
-//    System.out.println("d13 = "+d13);
-//    System.out.println("angle13 = "+angle13);
-//    System.out.println("(j, k) = ("+j+", "+k+")");
+    targetx = Math.abs(targetx);
+    targety = Math.abs(targety);
 
-    //have relative position now convert (j, k) to (x, y)
-    //convert j to x
-    double angle12 = Math.atan(Math.abs(rnodes[n1].y - rnodes[n2].y)/Math.abs(rnodes[n1].x - rnodes[n2].x));
-    if(n1 <= n2){
-      targetx = rnodes[n1].x + (targetj * Math.cos(angle12));
+    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
+    if(targetx < 0){
+      targetx = 0;
     }
-    else{
-      targetx = rnodes[n1].x - (targetj * Math.cos(angle12));
+    else if(targetx > maxX){
+      targetx = maxX;
     }
-    //convert k to y
-    double d1t = Math.sqrt(Math.pow(targetj, 2) + Math.pow(targetk, 2));
-    double angle1t = Math.atan(targetk/targetj);
-    if(n1 <= n3){
-      targety = rnodes[n1].y + (d1t * Math.sin(angle12+angle1t));
+    if(targety < 0){
+      targety = 0;
     }
-    else{
-      targety = rnodes[n1].y - (d1t * Math.sin(angle12+angle1t));
+    else if(targety > maxY){
+      targety = maxY;
     }
-
-
     System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     System.out.println();
 
-    for(int i = 0; i < rnodes.length; i++){
-      rnodes[i].td = 9999; // reset all lengths
+    tReady = true;
+    updateTargetLoc('T');
+    printGrid();
+    if(tReady && cReady){
+      sendtoCar();
     }
+    for(int i = 0; i < rnodes.length; i++){
+      rnodes[i].td = 9999; // reset all distances
+    }
+
   }
 
   /*
@@ -152,6 +176,51 @@ public class Grid{
   */
   public void locateCar(){
     calculateSmallest(1);
+    int n1 = cnodes[0];
+    int n2 = cnodes[1];
+    int n3 = cnodes[2];
+
+    System.out.println("Calculating using nodes:");
+    System.out.println(cnodes[0] + " " + cnodes[1] + " " + cnodes[2]);
+
+    updateCarLoc(' ');
+
+    double a, b, c, d, e, f;
+    a = (-2*rnodes[n1].x) + (2*rnodes[n2].x);
+    b = (-2*rnodes[n1].y) + (2*rnodes[n2].y);
+    c = Math.pow(rnodes[n1].cd, 2) - Math.pow(rnodes[n2].cd, 2) - Math.pow(rnodes[n1].x, 2) + Math.pow(rnodes[n2].x, 2)
+        - Math.pow(rnodes[n1].y, 2) + Math.pow(rnodes[n2].y, 2);
+    d = (-2*rnodes[n2].x) + (2*rnodes[n3].x);
+    e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
+    f = Math.pow(rnodes[n2].cd, 2) - Math.pow(rnodes[n3].cd, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
+        - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
+    carx = ((c*d)+(f*a))/((b*d)+(e*a));
+    cary = ((a*e)+(b*d))/((c*e)+(f*b));
+
+    System.out.println("Car is at (x,y) = ("+carx+", "+cary+").");
+    System.out.println();
+    if(carx < 0){
+      carx = 0;
+    }
+    else if(carx > maxR){
+      carx = maxR;
+    }
+    if(cary < 0){
+      cary = 0;
+    }
+    else if(cary > maxY){
+      cary = maxY;
+    }
+
+    cReady = true;
+    updateCarLoc('C');
+    printGrid();
+    if(tReady && cReady){
+      sendtoCar();
+    }
+    for(int i = 0; i < rnodes.length; i++){
+      rnodes[i].cd = 9999; // reset all distances
+    }
   }
 
   /*
@@ -159,13 +228,13 @@ public class Grid{
   * or the car (mcase == 1)
   */
   public void calculateSmallest(int mcase){
+    double min1 = 10000;
+    double min2 = 10000;
+    double min3 = 10000;
     if(mcase == 0){ //tnodes (target nodes)
       tnodes[0] = 97; // 90's should get phased out as real data spills in, set to 90's for debugging
       tnodes[1] = 98;
       tnodes[2] = 99;
-      double min1 = 9997;
-      double min2 = 9998;
-      double min3 = 9999;
 
       for(int i = 0; i < rnodes.length; i++){
         if(rnodes[i].td < min1){
@@ -192,9 +261,6 @@ public class Grid{
       cnodes[0] = 97; // 90's should get phased out as real data spills in, set to 90's for debugging
       cnodes[1] = 98;
       cnodes[2] = 99;
-      double min1 = 9997;
-      double min2 = 9998;
-      double min3 = 9999;
 
       for(int i = 0; i < rnodes.length; i++){
         if(rnodes[i].cd < min1){
@@ -217,6 +283,91 @@ public class Grid{
         }
       }
     }
+  }
+
+  /*
+  * Sends data to the car via TCP socket, car is running a server on port 8989.
+  * Method should only be called when data is ready.
+  */
+  public void sendtoCar(){
+    try{
+      carSocket = new Socket();
+      carSocket.connect(new InetSocketAddress(carIP, 8989), 5000);
+      DataOutputStream dos = new DataOutputStream(carSocket.getOutputStream());
+
+      String coords = carx+" "+cary+" "+targetx+" "+targety+" "; //null terminating " " is important! CarServer relies on it!
+      dos.writeBytes(coords);
+
+      carSocket.close();
+    }
+    catch (Exception e){
+      e.printStackTrace();
+    }
+
+    for(int i = 0; i < rnodes.length; i++){
+      rnodes[i].td = 9999; // reset all distances
+      rnodes[i].cd = 9999; // reset all distances
+    }
+    tReady = false;
+    cReady = false;
+  }
+
+  public void initializeGrid(){
+    maxR++; maxC++;
+    grid = new char[maxC][2*(maxR)];
+    for(int i = 0; i <= 2*maxR-1; i+=2){
+      for(int j = 0; j <= maxC-1; j++){
+        grid[j][i] = ' ';
+        grid[j][i+1] = ' ';
+      }
+    }
+    printGrid();
+  }
+
+  public void placeNode(int x, int y, int id){
+    grid[x/res][(2*y)/res] = 'N';
+    grid[x/res][(2*y)/res+1] = (char)(id+48);
+  }
+
+  public void updateTargetLoc(char c){
+    grid[(int)(targetx)/res][(int)(2*targety)/res] = c;
+//    grid[(int)(targetx)/res][(int)(2*targety)/res+1] = c;
+  }
+
+  public void updateCarLoc(char c){
+    grid[(int)(carx)/res][(int)(2*cary)/res] = c;
+    grid[(int)(carx)/res][(int)(2*cary)/res+1] = c;
+  }
+
+  public void printGrid(){
+  String xrow = "#X" + new String(new char[(2*maxC)]).replace('\0', 'X') + "#";
+  String brow = "###" + new String(new char[(2*maxC)]).replace('\0', '#');
+  System.out.print("\033[H\033[2J");
+  System.out.flush();
+  System.out.println(brow);
+  for(int i = 2*maxR-2; i >= 0; i-=2){
+    for(int j = 0; j <= maxC-1; j++){
+        if(j == 0){
+//          System.out.print("XX");
+          System.out.print("#Y");
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
+        }
+        else if(j == maxC-1){
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
+          System.out.print("#");
+//          System.out.print("XX");
+        }
+        else{
+          System.out.print(grid[j][i]+""+grid[j][i+1]);
+        }
+      }
+      System.out.println();
+    }
+    System.out.println(xrow);
+    System.out.println(brow);
+    System.out.println("Grid resolution is 5 cm. Legend: 'Y' is 5 cm, 'XX' is 5 cm.\n");
+    System.out.println("Target (TT) location: ("+targetx+", "+targety+").");
+    System.out.println("Car (CC) location: ("+carx+", "+cary+").");
   }
 
 }

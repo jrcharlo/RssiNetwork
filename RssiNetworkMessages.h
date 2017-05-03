@@ -8,6 +8,7 @@ enum {
 typedef nx_struct RssiMsg{
   nx_int16_t nodeid;
   nx_int16_t rssi;
+  nx_int16_t onodeid;
 } RssiMsg;
 
 #endif //RSSINETWORKMESSAGES_H__
