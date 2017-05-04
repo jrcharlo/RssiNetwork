@@ -66,7 +66,7 @@ void moveCar(){
   
   double dx = target_x - car_x;
   double dy = target_y - car_y;
-  if(abs(dx) >= dis){
+  if(abs(dx) > dis-1){
     if(dx > 0){ //set dir = 0
       if(dir == 1){
         _mright();
@@ -100,7 +100,7 @@ void moveCar(){
       car_x -= dis;
     }
   }
-  else if(abs(dy) >= dis){
+  else if(abs(dy) > dis-1){
     if(dy > 0){ // set dir = 1
       if(dir == 0){
         _mleft();
@@ -186,7 +186,7 @@ void _mForward(double d){
  digitalWrite(in3,HIGH);
  digitalWrite(in4,LOW);
  Serial.println("go forward!");
- delay(int(d*20));
+ delay(int(d*21));
  _mStop();
 }
 
@@ -210,7 +210,7 @@ void _mleft(){ //in 90 degree
  digitalWrite(in3,LOW);
  digitalWrite(in4,HIGH);
  Serial.println("go left!");
- delay(630);
+ delay(520);
  _mStop();
 }
 
@@ -222,7 +222,7 @@ void _mright(){ // in 90 degree
  digitalWrite(in3,HIGH);
  digitalWrite(in4,LOW);
  Serial.println("go left!");
- delay(630);
+ delay(520);
  _mStop();
 }
 
