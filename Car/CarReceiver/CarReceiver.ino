@@ -34,13 +34,13 @@ double target_x;
 double target_y;
 int ABS = 185;
 int ABS1 = 150;
-double dis =0;
+double dis =10;
 int rightDistance = 0;
 int leftDistance = 0;
 int middleDistance = 0;
 float cx = 0;
 float cy = 0;
-float orientation = 90;
+//float orientation = 90;
 
 void setup() {
   Serial.begin(115200);
@@ -66,7 +66,7 @@ void setup() {
 
 // constantly move car towards target
 void loop() {
-  if((abs(car_x - target_x) => 10) && (abs(car_y - target_y) => 10)){
+  if((abs(car_x - target_x) >= 10) || (abs(car_y - target_y) >= 10)){
     moveCar();
   }
 }
@@ -96,6 +96,7 @@ float currentAngle(){
 void moveCar(){
   float cAngle = currentAngle();
   double target_angle = angleToTarget(car_x, car_y, target_x, target_y);
+  
   Serial.println("Move car!");
   Serial.print("carX: ");
   Serial.println(car_x);
@@ -109,10 +110,11 @@ void moveCar(){
   Serial.println(target_angle);
   Serial.print("c angle: ");
   Serial.println(cAngle);
-  if(abs(cAngle - target_angle) >= 10){
-   turning(cAngle, target_angle);
-  }
+  
+  turning(cAngle, target_angle);
   moveTo(car_x, car_y, target_x, target_y);
+ // _mForward(10);
+ // updateCor();
 }
 
 void readWiFiPins(){
@@ -187,15 +189,20 @@ double angleToTarget(double xi, double yi, double xf, double yf){
       angle = (3*PI)/2;
     }
   }
-  return (180/PI)*angle;
+  return ((180/PI)*angle);
 }
 
 void turning(double angle1, double angle2){
-  double delta = (angle1-angle2);
-  while(abs(delta) >= 10){
-    _mright(1);
-    _mStop();
-    delta = (currentAngle()-angle2);
+  double delta = abs(angle1-angle2);
+  if(delta >= 180){
+    delta = 360 - delta;
+  }
+  while(delta >= 5){
+    _mright(5);
+    delta = abs(currentAngle()-angle2);
+    if(delta >= 180){
+      delta = 360 - delta;
+    }
   }
 }
 
@@ -206,8 +213,8 @@ void moveTo(double xi, double yi, double xf, double yf){
 
 void updateCor(){
   double angle = currentAngle();
-  car_x=car_x+cos(angle)*10;
-  car_y=car_y+sin(angle)*10;
+  car_x+=cos(angle)*10;
+  car_y+=sin(angle)*10;
 }
 
 void _mForward(float d){
@@ -231,6 +238,7 @@ void _mBack(float d){
  digitalWrite(in4,HIGH);
  Serial.println("go back!");
  delay(int(d*30));
+ _mStop();
 }
 
 void _mleft(float n){ //in 10 degree
@@ -242,6 +250,7 @@ void _mleft(float n){ //in 10 degree
  digitalWrite(in4,HIGH);
  Serial.println("go left!");
  delay(int(7*n));
+ _mStop();
 }
 
 void _mright(float n){ // in 10 degree
@@ -253,6 +262,7 @@ void _mright(float n){ // in 10 degree
  digitalWrite(in4,LOW);
  Serial.println("go left!");
  delay(int(7*n));
+ _mStop();
 }
 
 void _mStop(){

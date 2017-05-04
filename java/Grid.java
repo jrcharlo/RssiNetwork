@@ -33,8 +33,8 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 10.0;
-    targety = 0.0;
+    targetx = 0.0;
+    targety = 100.0;
     cReady = false;
     carx = 0.0;
     cary = 0.0;
@@ -46,6 +46,8 @@ public class Grid{
     maxC = maxX/res; // 5cm (columns represent x-axis)
     initializeGrid();
     initializeNodes();
+    sendtoCar();
+    System.exit(1);
   }
 
   /*
@@ -307,6 +309,9 @@ public class Grid{
 
       String coords = carx+" "+cary+" "+targetx+" "+targety+" "; //null terminating " " is important! CarServer relies on it!
       dos.writeBytes(coords);
+
+      System.out.println("Data sent!");
+      System.out.println(coords);
 
       carSocket.close();
     }
