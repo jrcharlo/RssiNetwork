@@ -1,10 +1,4 @@
 #include <math.h>
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_HMC5883_U.h>
-
-/* Assign a unique ID to this sensor at the same time */
-Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
 // Pin Definitions
 const byte interruptPin = 2;
@@ -22,24 +16,19 @@ int TargetX = 10;
 int TargetY = 12;
 
 // Variable declarations
-int readindex = 0;
+int intIndex = 0;
 volatile int xi[9];
 volatile int yi[9];
 volatile int xf[9];
 volatile int yf[9];
-volatile int i = 0;
+int dir = 0; // car's direction, initially 0 = +x
 double car_x=0;
 double car_y=0;
 double target_x;
 double target_y;
+double dis = 10.0; //distance to move in one go, in cm
 int ABS = 185;
 int ABS1 = 150;
-double dis =10;
-int rightDistance = 0;
-int leftDistance = 0;
-int middleDistance = 0;
-float cx = 0;
-float cy = 0;
 //float orientation = 90;
 
 void setup() {
@@ -57,46 +46,14 @@ void setup() {
   car_y=0;
   target_x=0;
   target_y=0;
-
-  //initialize magSensor
-  if(!mag.begin()){
-    while (1);
-  }
 }
 
 // constantly move car towards target
 void loop() {
-  if((abs(car_x - target_x) >= 10) || (abs(car_y - target_y) >= 10)){
-    moveCar();
-  }
-}
-
-float currentAngle(){  
-  sensors_event_t event;
-  mag.getEvent(&event);
-  float heading = atan2(event.magnetic.y, event.magnetic.x);
-  // Once you have your heading, you must then add your 'Declination Angle', which is the 'Error' of the magnetic field in your location.
-  // Find yours here: http://www.magnetic-declination.com/
-  // Mine is: -13* 2' W, which is ~13 Degrees, or (which we need) 0.22 radians
-  // If you cannot find your Declination, comment out these two lines, your compass will be slightly off.
-  float declinationAngle = 0.1868;
-  heading += declinationAngle;
-  // Correct for when signs are reversed.
-  if (heading < 0)
-    heading += 2 * PI;
-  // Check for wrap due to addition of declination.
-  if (heading > 2 * PI)
-    heading -= 2 * PI;
-  // Convert radians to degrees for readability.
-  float headingDegrees = heading * 180 / M_PI;
-  //Serial.print("Heading (degrees): "); Serial.println(headingDegrees);
-  return headingDegrees;
+  moveCar();
 }
 
 void moveCar(){
-  float cAngle = currentAngle();
-  double target_angle = angleToTarget(car_x, car_y, target_x, target_y);
-  
   Serial.println("Move car!");
   Serial.print("carX: ");
   Serial.println(car_x);
@@ -106,34 +63,96 @@ void moveCar(){
   Serial.println(target_x);
   Serial.print("tarY: ");
   Serial.println(target_y);
-  Serial.print("t angle: ");
-  Serial.println(target_angle);
-  Serial.print("c angle: ");
-  Serial.println(cAngle);
   
-  turning(cAngle, target_angle);
-  moveTo(car_x, car_y, target_x, target_y);
- // _mForward(10);
- // updateCor();
+  double dx = target_x - car_x;
+  double dy = target_y - car_y;
+  if(abs(dx) >= dis){
+    if(dx > 0){ //set dir = 0
+      if(dir == 1){
+        _mright();
+      }
+      else if(dir == 2){
+        _mright();
+        _mright();
+      }
+      else if(dir == 3){
+        _mleft();
+      }
+      // car now facing +x (dir = 0)
+      dir = 0;
+      _mForward(dis);
+      car_x += dis;
+    }
+    else{ //set dir = 2
+      if(dir == 0){
+        _mleft();
+        _mleft();
+      }
+      else if(dir == 1){
+        _mleft();
+      }
+      else if(dir == 3){
+        _mright();
+      }
+      // car now facing -x (dir = 2)
+      dir = 2;
+      _mForward(dis);
+      car_x -= dis;
+    }
+  }
+  else if(abs(dy) >= dis){
+    if(dy > 0){ // set dir = 1
+      if(dir == 0){
+        _mleft();
+      }
+      else if(dir == 2){
+        _mright();
+      }
+      else if(dir == 3){
+        _mright();
+        _mright();
+      }
+      // car now facing +y (dir = 1)
+      dir = 1;
+      _mForward(dis);
+      car_y += dis;
+    }
+    else{ // set dir = 3
+      if(dir == 0){
+        _mright();
+      }
+      else if(dir == 1){
+        _mleft();
+        _mleft();
+      }
+      else if(dir == 2){
+        _mleft();
+      }
+      // car now facing -y (dir = 3)
+      dir = 3;
+      _mForward(dis);
+      car_y -= dis;
+    }
+  }
 }
 
 void readWiFiPins(){
   // ----------------------------  receving data from esp8266
-  if(i < 9){
+  if(intIndex < 9){
     int xcar = digitalRead(CarX)==HIGH?1:0;
     int ycar = digitalRead(CarY)==HIGH?1:0;
     int xtarget = digitalRead(TargetX)==HIGH?1:0;
     int ytarget = digitalRead(TargetY)==HIGH?1:0;
-    xi[i] = xcar;
-    yi[i] = ycar;
-    xf[i] = xtarget;
-    yf[i++] = ytarget;
+    xi[intIndex] = xcar;
+    yi[intIndex] = ycar;
+    xf[intIndex] = xtarget;
+    yf[intIndex++] = ytarget;
     //xi[i] = xi[i]<<i;
    // Serial.print(x);
    // Serial.print("x");Serial.print(i);Serial.print(": "); Serial.print(xi[i]);Serial.print("\t");    
   }
-  if(i >= 9){
-    i = 0;
+  if(intIndex >= 9){
+    intIndex = 0;
    // car_x = computeInt(xi);
     Serial.println();
     Serial.print("car_x: ");
@@ -159,65 +178,7 @@ double computeInt(int a[]){
   return x;
 }
 
-double angleToTarget(double xi, double yi, double xf, double yf){
-  double angle;
-  if(xi != xf){
-    if(yi<=yf){
-      if(xi<=xf){
-        angle = atan((yf-yi)/(xf-xi));
-      }
-      else{
-        angle = atan((yf-yi)/(xf-xi))+PI;
-      }
-//      angle = (xi<xf)?atan((yf-yi)/(xf-xi)):(atan(yf-yi)/(xf-xi)+PI);
-    }
-    else{
-      if(xi<=xf){
-        angle = atan((yf-yi)/(xf-xi))+2*PI;
-      }
-      else{
-        angle = atan((yf-yi)/(xf-xi))+PI;
-      }
-//      angle = (xi<xf)?(atan((yf-yi)/(xf-xi))+2*PI):(atan(yf-yi)/(xf-xi)+PI);
-    }
-  }
-  else{
-    if(yi <= yf){
-      angle = PI/2;
-    }
-    else{
-      angle = (3*PI)/2;
-    }
-  }
-  return ((180/PI)*angle);
-}
-
-void turning(double angle1, double angle2){
-  double delta = abs(angle1-angle2);
-  if(delta >= 180){
-    delta = 360 - delta;
-  }
-  while(delta >= 5){
-    _mright(5);
-    delta = abs(currentAngle()-angle2);
-    if(delta >= 180){
-      delta = 360 - delta;
-    }
-  }
-}
-
-void moveTo(double xi, double yi, double xf, double yf){
-  _mForward(10);
-  updateCor();
-}
-
-void updateCor(){
-  double angle = currentAngle();
-  car_x+=cos(angle)*10;
-  car_y+=sin(angle)*10;
-}
-
-void _mForward(float d){
+void _mForward(double d){
  analogWrite(ENA,ABS);
  analogWrite(ENB,ABS1);
  digitalWrite(in1,HIGH);
@@ -229,7 +190,7 @@ void _mForward(float d){
  _mStop();
 }
 
-void _mBack(float d){
+void _mBack(double d){
  analogWrite(ENA,ABS);
  analogWrite(ENB,ABS1);
  digitalWrite(in1,LOW);
@@ -237,11 +198,11 @@ void _mBack(float d){
  digitalWrite(in3,LOW);
  digitalWrite(in4,HIGH);
  Serial.println("go back!");
- delay(int(d*30));
+ delay(int(d*10));
  _mStop();
 }
 
-void _mleft(float n){ //in 10 degree
+void _mleft(){ //in 90 degree
  analogWrite(ENA,175);
  analogWrite(ENB,145);
  digitalWrite(in1,HIGH);
@@ -249,11 +210,11 @@ void _mleft(float n){ //in 10 degree
  digitalWrite(in3,LOW);
  digitalWrite(in4,HIGH);
  Serial.println("go left!");
- delay(int(7*n));
+ delay(630);
  _mStop();
 }
 
-void _mright(float n){ // in 10 degree
+void _mright(){ // in 90 degree
  analogWrite(ENA,175);
  analogWrite(ENB,145);
  digitalWrite(in1,LOW);
@@ -261,7 +222,7 @@ void _mright(float n){ // in 10 degree
  digitalWrite(in3,HIGH);
  digitalWrite(in4,LOW);
  Serial.println("go left!");
- delay(int(7*n));
+ delay(630);
  _mStop();
 }
 

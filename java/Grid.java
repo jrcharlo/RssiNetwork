@@ -33,8 +33,8 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 0.0;
-    targety = 100.0;
+    targetx = 80.0;
+    targety = 80.0;
     cReady = false;
     carx = 0.0;
     cary = 0.0;
@@ -46,8 +46,6 @@ public class Grid{
     maxC = maxX/res; // 5cm (columns represent x-axis)
     initializeGrid();
     initializeNodes();
-    sendtoCar();
-    System.exit(1);
   }
 
   /*
