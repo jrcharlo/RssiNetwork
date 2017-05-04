@@ -116,7 +116,11 @@ public class Grid{
     int n3 = tnodes[2];
 
     System.out.println("Calculating using nodes:");
-    System.out.println(tnodes[0] + " " + tnodes[1] + " " + tnodes[2]);
+    System.out.println(n1 + " " + n2 + " " + n3);
+
+    System.out.println(n1 + ": " + rnodes[n1].td);
+    System.out.println(n2 + ": " + rnodes[n2].td);
+    System.out.println(n3 + ": " + rnodes[n3].td);
 
     updateTargetLoc(' ');
 
@@ -132,8 +136,8 @@ public class Grid{
     a = Math.abs(a);
     b = Math.abs(b);
     c = Math.abs(c);
-    d = Math.abs(d);
     e = Math.abs(e);
+    d = Math.abs(d);
     f = Math.abs(f);
     targetx = ((f*b)-(e*c))/((b*d)-(e*a));
     targety = ((a*e)-(c*d))/((a*e)-(d*b));
@@ -143,7 +147,7 @@ public class Grid{
     targetx = Math.abs(targetx);
     targety = Math.abs(targety);
 
-    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
+//    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
     if(targetx < 0){
       targetx = 0;
     }
@@ -156,8 +160,8 @@ public class Grid{
     else if(targety > maxY){
       targety = maxY;
     }
-    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
-    System.out.println();
+//    System.out.println("Target is at (x,y) = ("+targetx+", "+targety+").");
+//    System.out.println();
 
     tReady = true;
     updateTargetLoc('T');
@@ -194,11 +198,17 @@ public class Grid{
     e = (-2*rnodes[n2].y) + (2*rnodes[n3].y);
     f = Math.pow(rnodes[n2].cd, 2) - Math.pow(rnodes[n3].cd, 2) - Math.pow(rnodes[n3].x, 2) + Math.pow(rnodes[n3].x, 2)
         - Math.pow(rnodes[n3].y, 2) + Math.pow(rnodes[n3].y, 2);
-    carx = ((c*d)+(f*a))/((b*d)+(e*a));
-    cary = ((a*e)+(b*d))/((c*e)+(f*b));
+    a = Math.abs(a);
+    b = Math.abs(b);
+    c = Math.abs(c);
+    d = Math.abs(d);
+    e = Math.abs(e);
+    f = Math.abs(f);
+    carx = ((f*b)-(e*c))/((b*d)-(e*a));
+    cary = ((a*e)-(c*d))/((a*e)-(d*b));
 
-    System.out.println("Car is at (x,y) = ("+carx+", "+cary+").");
-    System.out.println();
+//    System.out.println("Car is at (x,y) = ("+carx+", "+cary+").");
+//    System.out.println();
     if(carx < 0){
       carx = 0;
     }
@@ -336,7 +346,7 @@ public class Grid{
 
   public void updateCarLoc(char c){
     grid[(int)(carx)/res][(int)(2*cary)/res] = c;
-    grid[(int)(carx)/res][(int)(2*cary)/res+1] = c;
+//    grid[(int)(carx)/res][(int)(2*cary)/res+1] = c;
   }
 
   public void printGrid(){
