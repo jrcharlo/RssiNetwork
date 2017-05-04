@@ -33,8 +33,8 @@ public class Grid{
     tnodes = new int[3];
     cnodes = new int[3];
     tReady = false;
-    targetx = 80.0;
-    targety = 80.0;
+    targetx = 0.0;
+    targety = 0.0;
     cReady = false;
     carx = 0.0;
     cary = 0.0;
